@@ -23,7 +23,7 @@ public class AlibeezUserRequester {
 
     private static String BASE_URL = "/users";
 
-    private static String FIELDS = "fields=lastName,firstName,operationalManager,emailPro,arrivalDay,leaveDay,operationalManagerShortUsername";
+    private static String FIELDS = "fields=lastName,firstName,operationalManager,emailPro,tag.etablissement,arrivalDay,leaveDay,operationalManagerShortUsername";
 
     private static String FILTER = "filter=enabled==true";
 
