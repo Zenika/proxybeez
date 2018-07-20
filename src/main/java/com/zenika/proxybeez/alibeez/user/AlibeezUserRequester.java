@@ -25,7 +25,7 @@ public class AlibeezUserRequester {
 
     private static String FIELDS = "fields=lastName,firstName,operationalManager,emailPro,tag.etablissement,arrivalDay,leaveDay,operationalManagerShortUsername";
 
-    private static String FILTER = "filter=enabled==true";
+    private static String FILTER = "filter=enabled==true&filter=type==EMPLOYEE";
 
     public AlibeezUserRequester(ApplicationProperties applicationProperties) {
         this.applicationProperties = applicationProperties;
