@@ -19,7 +19,6 @@ public class AlibeezUserProxy implements AlibeezUserInterface {
     private String lastName;
     private String firstName;
     private String fullName;
-    private String etablissement;
     private String currentManager;
     private String zenikaEmail;
     private String operationalManagerShortUsername;
@@ -42,12 +41,12 @@ public class AlibeezUserProxy implements AlibeezUserInterface {
         this.fullName = fullName;
     }
 
-    public String getEtablissement() {
+    public String getGeographicalAgency() {
         return alibeezUser.getTags().getEtablissement();
     }
 
-    public void setEtablissement(String etablissement) {
-        alibeezUser.getTags().setEtablissement(etablissement);
+    public void setGeographicalAgency(String geographicalAgency) {
+        alibeezUser.getTags().setEtablissement(geographicalAgency);
     }
 
     public String getCurrentManager() {
