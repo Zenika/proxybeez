@@ -14,7 +14,7 @@ public class AlibeezUser {
     private String firstName;
     private String operationalManager;
     private String emailPro;
-    private String etablissement;
+    private Tags tags;
     private Date arrivalDay;
     private Date leaveDay;
     private String operationalManagerShortUsername;
@@ -54,14 +54,6 @@ public class AlibeezUser {
         this.emailPro = emailPro;
     }
 
-    public String getEtablissement() {
-        return etablissement;
-    }
-
-    public void setEtablissement(String etablissement) {
-        this.etablissement = etablissement;
-    }
-
     public Date getArrivalDay() {
         return arrivalDay;
     }
@@ -86,6 +78,14 @@ public class AlibeezUser {
         this.operationalManagerShortUsername = operationalManagerShortUsername;
     }
 
+    public Tags getTags() {
+        return tags;
+    }
+
+    public void setTags(Tags tags) {
+        this.tags = tags;
+    }
+
     @Override
     public String toString() {
         return "AlibeezUser{" +
@@ -97,5 +97,17 @@ public class AlibeezUser {
                 ", leaveDay=" + leaveDay +
                 ", operationalManagerShortUsername=" + operationalManagerShortUsername +
                 '}';
+    }
+
+    public static class Tags {
+        private String etablissement;
+
+        public String getEtablissement() {
+            return etablissement;
+        }
+
+        public void setEtablissement(String etablissement) {
+            this.etablissement = etablissement;
+        }
     }
 }

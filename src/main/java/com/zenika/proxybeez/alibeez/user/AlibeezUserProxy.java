@@ -42,20 +42,12 @@ public class AlibeezUserProxy implements AlibeezUserInterface {
         this.fullName = fullName;
     }
 
-    public AlibeezUser getAlibeezUser() {
-        return alibeezUser;
-    }
-
-    public void setAlibeezUser(AlibeezUser alibeezUser) {
-        this.alibeezUser = alibeezUser;
-    }
-
     public String getEtablissement() {
-        return alibeezUser.getEtablissement();
+        return alibeezUser.getTags().getEtablissement();
     }
 
     public void setEtablissement(String etablissement) {
-        alibeezUser.setEtablissement(etablissement);
+        alibeezUser.getTags().setEtablissement(etablissement);
     }
 
     public String getCurrentManager() {
