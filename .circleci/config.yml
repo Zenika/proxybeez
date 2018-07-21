@@ -64,3 +64,4 @@ workflows:
                     branches:
                         only:
                             - master
+                            - circleci
