@@ -31,8 +31,10 @@ jobs:
                 destination: proxybeez
     deploy:
         environment:
-            DEPLOY_HOST: "165.227.131.59"
             WAR_PATH: *war_path
+            DEPLOY_DIR: ~/deploy
+            CLEVER_CLOUD_REMOTE_HOST: push-par-clevercloud-customers.services.clever-cloud.com
+            CLEVER_CLOUD_REMOTE_APP_ID: app_951ef043-3d74-41b6-a858-1370edee5ec9
         docker:
             - image: circleci/openjdk:8-jdk
         steps:
@@ -41,15 +43,19 @@ jobs:
                 at: ./
             - add_ssh_keys:
                 fingerprints:
-                    - "cd:c9:35:1e:b6:f7:49:b8:4f:a1:59:c9:fc:99:4f:cc"
-            - run: |
-                ssh-keyscan ${DEPLOY_HOST} >> ~/.ssh/known_hosts
-                TEMP_DIR=$(ssh root@${DEPLOY_HOST} mktemp --directory)
-                scp -p ${WAR_PATH} root@${DEPLOY_HOST}:${TEMP_DIR}
-                ssh -T root@${DEPLOY_HOST} <<EOF
-                pkill -f java
-                nohup java -jar ${TEMP_DIR}/*.war &
-                EOF
+                    - "26:c2:fd:b8:79:5d:35:1e:eb:f7:03:15:74:64:08:b9"
+            - run:
+                name: Deploy to production
+                command: |
+                    ssh-keyscan ${CLEVER_CLOUD_REMOTE_HOST} >> ~/.ssh/known_hosts
+                    mkdir -p ${DEPLOY_DIR}
+                    cp ${WAR_PATH} ${DEPLOY_DIR}
+                    cd ${DEPLOY_DIR}
+                    git init
+                    git add .
+                    git commit -m ":rocket: deploy!"
+                    git remote add clever git+ssh://git@${CLEVER_CLOUD_REMOTE_HOST}/${CLEVER_CLOUD_REMOTE_APP_ID}.git
+                    git push --force clever master
 
 workflows:
     version: 2
