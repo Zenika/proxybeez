@@ -41,10 +41,10 @@ jobs:
                 at: ./
             - add_ssh_keys:
                 fingerprints:
-                    - ""
+                    - "cd:c9:35:1e:b6:f7:49:b8:4f:a1:59:c9:fc:99:4f:cc"
             - run: |
                 ssh-keyscan ${DEPLOY_HOST} >> ~/.ssh/known_hosts
-                TEMP_DIR=$(ssh root@${PRODUCTION_MACHINE_HOST} mktemp --directory)
+                TEMP_DIR=$(ssh root@${DEPLOY_HOST} mktemp --directory)
                 scp -p ${WAR_PATH} root@${DEPLOY_HOST}:${TEMP_DIR}
                 ssh -T root@${DEPLOY_HOST} <<EOF
                 pkill -f java
