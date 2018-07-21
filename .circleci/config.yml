@@ -52,6 +52,7 @@ jobs:
                     cp ${WAR_PATH} ${DEPLOY_DIR}/proxybeez.war
                     cd ${DEPLOY_DIR}
                     git config user.email "dsi-ext@zenika.com"
+                    git config user.name "DSI Ext"
                     git init
                     git add .
                     git commit -m ":rocket: deploy!"
