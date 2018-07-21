@@ -1,0 +1,66 @@
+version: 2
+jobs:
+    build:
+        docker:
+            - image: circleci/openjdk:8-jdk
+        steps:
+            - checkout
+            - restore_cache:
+                keys:
+                    - maven-dependencies-{{ checksum "pom.xml" }}
+                    - maven-dependencies-
+            - restore_cache:
+                keys:
+                    - npm-dependencies-{{ checksum "package.json" }}
+                    - npm-dependencies-
+            - run: ./mvnw -Pprod -DskipTests clean package
+            - save_cache:
+                key: npm-dependencies-{{ checksum "package.json" }}
+                paths:
+                    - ./node_modules
+            - save_cache:
+                key: maven-dependencies-{{ checksum "pom.xml" }}
+                paths:
+                    - ~/.m2
+            - persist_to_workspace:
+                root: ./
+                paths:
+                    - &war_path target/proxybeez-0.0.1-SNAPSHOT.war
+            - store_artifacts:
+                path: *war_path
+                destination: proxybeez
+    deploy:
+        environment:
+            DEPLOY_HOST: "165.227.131.59"
+            WAR_PATH: *war_path
+        docker:
+            - image: circleci/openjdk:8-jdk
+        steps:
+            - checkout
+            - attach_workspace:
+                at: ./
+            - add_ssh_keys:
+                fingerprints:
+                    - ""
+            - run: |
+                ssh-keyscan ${DEPLOY_HOST} >> ~/.ssh/known_hosts
+                TEMP_DIR=$(ssh root@${PRODUCTION_MACHINE_HOST} mktemp --directory)
+                scp -p ${WAR_PATH} root@${DEPLOY_HOST}:${TEMP_DIR}
+                ssh -T root@${DEPLOY_HOST} <<EOF
+                pkill -f java
+                nohup java -jar ${TEMP_DIR}/*.war &
+                EOF
+
+workflows:
+    version: 2
+
+    build-and-deploy:
+        jobs:
+            - build
+            - deploy:
+                requires:
+                    - build
+                filter:
+                    branches:
+                        only:
+                            - master
