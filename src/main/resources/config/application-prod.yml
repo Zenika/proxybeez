@@ -21,7 +21,7 @@ spring:
             enabled: false
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:${POSTGRESQL_ADDON_URI}
+        url: jdbc:postgresql://${POSTGRESQL_ADDON_HOST}:${POSTGRESQL_ADDON_PORT}/${POSTGRESQL_ADDON_DB}
         username: ${POSTGRESQL_ADDON_USER}
         password: ${POSTGRESQL_ADDON_PASSWORD}
     jpa:
