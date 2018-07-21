@@ -50,6 +50,7 @@ jobs:
                     ssh-keyscan ${CLEVER_CLOUD_REMOTE_HOST} >> ~/.ssh/known_hosts
                     mkdir -p ${DEPLOY_DIR}
                     cp ${WAR_PATH} ${DEPLOY_DIR}/proxybeez.war
+                    cp keystore.p12 ${DEPLOY_DIR}/keystore.p12
                     cd ${DEPLOY_DIR}
                     git init
                     git config user.email "dsi-ext@zenika.com"
