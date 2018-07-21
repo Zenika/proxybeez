@@ -51,9 +51,9 @@ jobs:
                     mkdir -p ${DEPLOY_DIR}
                     cp ${WAR_PATH} ${DEPLOY_DIR}/proxybeez.war
                     cd ${DEPLOY_DIR}
+                    git init
                     git config user.email "dsi-ext@zenika.com"
                     git config user.name "DSI Ext"
-                    git init
                     git add .
                     git commit -m ":rocket: deploy!"
                     git remote add clever git+ssh://git@${CLEVER_CLOUD_REMOTE_HOST}/${CLEVER_CLOUD_REMOTE_APP_ID}.git
