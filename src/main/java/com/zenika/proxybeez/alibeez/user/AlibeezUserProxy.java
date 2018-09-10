@@ -2,9 +2,6 @@ package com.zenika.proxybeez.alibeez.user;
 
 import java.util.Date;
 
-/**
- * Created by marc on 22/05/2017.
- */
 public class AlibeezUserProxy {
 
     public AlibeezUserProxy(AlibeezUser alibeezUser) {
@@ -37,7 +34,7 @@ public class AlibeezUserProxy {
     }
 
     public String getZenikaEmail() {
-        return this.alibeezUser.getEmailPro();
+        return this.alibeezUser.getUsername();
     }
 
     public Date getArrivalDay() {

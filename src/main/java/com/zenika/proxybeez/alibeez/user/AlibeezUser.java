@@ -4,16 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Date;
 
-/**
- * Created by marc on 22/05/17.
- */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlibeezUser {
 
+    private String username;
     private String lastName;
     private String firstName;
     private String operationalManager;
-    private String emailPro;
     private Tags tags;
     private Date arrivalDay;
     private Date leaveDay;
@@ -21,6 +18,10 @@ public class AlibeezUser {
 
     public AlibeezUser() {
     }
+
+    public String getUsername() { return username; }
+
+    public void setUsername(String username) { this.username = username; }
 
     public String getLastName() {
         return lastName;
@@ -44,14 +45,6 @@ public class AlibeezUser {
 
     public void setOperationalManager(String operationalManager) {
         this.operationalManager = operationalManager;
-    }
-
-    public String getEmailPro() {
-        return emailPro;
-    }
-
-    public void setEmailPro(String emailPro) {
-        this.emailPro = emailPro;
     }
 
     public Date getArrivalDay() {
@@ -89,14 +82,15 @@ public class AlibeezUser {
     @Override
     public String toString() {
         return "AlibeezUser{" +
-                "lastName='" + lastName + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", operationalManager='" + operationalManager + '\'' +
-                ", emailPro='" + emailPro + '\'' +
-                ", arrivalDay=" + arrivalDay +
-                ", leaveDay=" + leaveDay +
-                ", operationalManagerShortUsername=" + operationalManagerShortUsername +
-                '}';
+            "username='" + username + '\'' +
+            ", lastName='" + lastName + '\'' +
+            ", firstName='" + firstName + '\'' +
+            ", operationalManager='" + operationalManager + '\'' +
+            ", tags=" + tags +
+            ", arrivalDay=" + arrivalDay +
+            ", leaveDay=" + leaveDay +
+            ", operationalManagerShortUsername='" + operationalManagerShortUsername + '\'' +
+            '}';
     }
 
     public static class Tags {
