@@ -1,0 +1,75 @@
+version: 2
+jobs:
+    build:
+        docker:
+            - image: circleci/openjdk:8-jdk
+        steps:
+            - checkout
+            - restore_cache:
+                keys:
+                    - maven-dependencies-{{ checksum "pom.xml" }}
+                    - maven-dependencies-
+            - restore_cache:
+                keys:
+                    - npm-dependencies-{{ checksum "package.json" }}
+                    - npm-dependencies-
+            - run: ./mvnw -Pprod -DskipTests clean package
+            - save_cache:
+                key: npm-dependencies-{{ checksum "package.json" }}
+                paths:
+                    - ./node_modules
+            - save_cache:
+                key: maven-dependencies-{{ checksum "pom.xml" }}
+                paths:
+                    - ~/.m2
+            - persist_to_workspace:
+                root: ./
+                paths:
+                    - &war_path target/proxybeez-0.0.1-SNAPSHOT.war
+            - store_artifacts:
+                path: *war_path
+                destination: proxybeez
+    deploy:
+        environment:
+            WAR_PATH: *war_path
+            DEPLOY_DIR: ~/deploy
+            CLEVER_CLOUD_REMOTE_HOST: push-par-clevercloud-customers.services.clever-cloud.com
+            CLEVER_CLOUD_REMOTE_APP_ID: app_951ef043-3d74-41b6-a858-1370edee5ec9
+        docker:
+            - image: circleci/openjdk:8-jdk
+        steps:
+            - checkout
+            - attach_workspace:
+                at: ./
+            - add_ssh_keys:
+                fingerprints:
+                    - "6f:f2:b4:c2:e5:13:28:f8:02:2d:da:48:34:0c:14:7f"
+            - run:
+                name: Deploy to production
+                command: |
+                    ssh-keyscan ${CLEVER_CLOUD_REMOTE_HOST} >> ~/.ssh/known_hosts
+                    mkdir -p ${DEPLOY_DIR}
+                    cp ${WAR_PATH} ${DEPLOY_DIR}/proxybeez.war
+                    cp keystore.p12 ${DEPLOY_DIR}/keystore.p12
+                    cd ${DEPLOY_DIR}
+                    git init
+                    git config user.email "dsi-ext@zenika.com"
+                    git config user.name "DSI Ext"
+                    git add .
+                    git commit -m ":rocket: deploy!"
+                    git remote add clever git+ssh://git@${CLEVER_CLOUD_REMOTE_HOST}/${CLEVER_CLOUD_REMOTE_APP_ID}.git
+                    git push --force clever master
+
+workflows:
+    version: 2
+
+    build-and-deploy:
+        jobs:
+            - build
+            - deploy:
+                requires:
+                    - build
+                filters:
+                    branches:
+                        only:
+                            - master
