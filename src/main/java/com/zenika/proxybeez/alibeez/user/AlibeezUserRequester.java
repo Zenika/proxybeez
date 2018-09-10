@@ -23,7 +23,7 @@ public class AlibeezUserRequester {
 
     private static String BASE_URL = "/users";
 
-    private static String FIELDS = "fields=lastName,firstName,operationalManager,emailPro,tag.etablissement,arrivalDay,leaveDay,operationalManagerShortUsername";
+    private static String FIELDS = "fields=username,lastName,firstName,operationalManager,tag.etablissement,arrivalDay,leaveDay,operationalManagerShortUsername";
 
     private static String FILTER = "filter=enabled==true&filter=type==EMPLOYEE";
 
@@ -46,13 +46,5 @@ public class AlibeezUserRequester {
         }
 
         return alibeezUsers;
-    }
-
-    private Map<String, AlibeezUser> buildUsersMap(List<AlibeezUser> users) {
-        Map<String, AlibeezUser> map = new HashMap<>();
-        for (AlibeezUser user : users) {
-            map.put(user.getEmailPro(), user);
-        }
-        return map;
     }
 }
