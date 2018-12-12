@@ -13,7 +13,7 @@ jobs:
                 keys:
                     - npm-dependencies-{{ checksum "package.json" }}
                     - npm-dependencies-
-            - run: ./mvnw -Pprod -DskipTests clean package
+            - run: ./mvnw -Pprod,swagger -DskipTests clean package
             - save_cache:
                 key: npm-dependencies-{{ checksum "package.json" }}
                 paths:
