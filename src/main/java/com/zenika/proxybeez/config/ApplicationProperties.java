@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Properties are configured in the application.yml file.
  * </p>
  */
-@ConfigurationProperties(prefix = "application", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "application")
 public class ApplicationProperties {
 
     private final Alibeez alibeez = new Alibeez();
@@ -19,24 +19,6 @@ public class ApplicationProperties {
     public static class Alibeez {
         private String baseUrl = "";
         private String key = "";
-        private String keyCanada = "";
-        private String keySingapore = "";
-
-        public String getKeyCanada() {
-            return keyCanada;
-        }
-
-        public void setKeyCanada(String keyCanada) {
-            this.keyCanada = keyCanada;
-        }
-
-        public String getKeySingapore() {
-            return keySingapore;
-        }
-
-        public void setKeySingapore(String keySingapore) {
-            this.keySingapore = keySingapore;
-        }
 
         public Alibeez() {
         }

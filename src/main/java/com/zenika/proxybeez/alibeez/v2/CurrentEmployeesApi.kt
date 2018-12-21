@@ -1,11 +1,12 @@
 package com.zenika.proxybeez.alibeez.v2
 
 import com.codahale.metrics.annotation.Timed
-import com.zenika.proxybeez.config.ApplicationProperties
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.annotations.Api
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 
@@ -13,48 +14,73 @@ import org.springframework.web.util.UriComponentsBuilder
 @RestController
 @RequestMapping("/api/v2")
 class CurrentEmployeesResource(
-    val applicationProperties: ApplicationProperties
+    val alibeezProperties: AlibeezProperties,
+    val objectMapper: ObjectMapper
 ) {
     @GetMapping("/current-employees")
     @Timed
-    fun get(): EmployeesDto =
-        listOf(
-            applicationProperties.alibeez.key,
-            applicationProperties.alibeez.keyCanada,
-            applicationProperties.alibeez.keySingapore
-        )
-            .filter { it.isNotEmpty() }
-            .map { getFromAlibeezWithKey(it) }
-            .reduce { employees, employeesForKey -> employees.merge(employeesForKey) }
+    fun get(): ResultForAllInstances =
+        alibeezProperties.instances
+            .filter { it.value.key.isNotEmpty() }
+            .mapValues { getFromInstance(it.value) }
+            .mapValues { (instance, result) ->
+                alibeezProperties.instances[instance]?.defaults?.let { applyDefaults(result, it) } ?: result
+            }
+            .entries
+            .fold(ResultForAllInstances()) { resultForAll, (instance, resultForOne) ->
+                resultForAll.merge(resultForOne, instance)
+            }
 
-    private fun getFromAlibeezWithKey(key: String): EmployeesDto {
-        val uri = UriComponentsBuilder.fromHttpUrl(applicationProperties.alibeez.baseUrl)
+    private fun getFromInstance(config: AlibeezInstanceProperties): ResultForOneInstance {
+        val uri = UriComponentsBuilder.fromHttpUrl(config.baseUrl)
             .pathSegment("users")
-            .query(key)
-            .queryParam("fields", "uuid,lastName,firstName,operationalManager,username,tag.etablissement,tag.agency,arrivalDay,operationalManagerShortUsername")
-            .queryParam("filter", "type==EMPLOYEE", "enabled==true")
+            .queryParam("key", config.key)
+            .queryParam("fields", config.fields.joinToString(","))
+            .queryParam("filter", *config.filters.toTypedArray())
             .build()
             .encode()
             .toUri()
         val restTemplate = RestTemplate()
-        val response = restTemplate.getForObject(uri, AlibeezResponse::class.java)
-        val employees = response.result.map {
+        val response = try {
+            restTemplate.getForObject(uri, AlibeezResponse::class.java)
+        } catch (ex: HttpClientErrorException) {
+            val error = objectMapper.readValue(ex.responseBodyAsString, AlibeezError::class.java)
+            return ResultForOneInstance(
+                error = ErrorDto(
+                    statusCode = ex.statusCode.value(),
+                    statusText = ex.statusText,
+                    errorCode = error.errorCode,
+                    errorMessage = error.errorMessage
+                )
+            )
+        }
+        val employees = response.result.map { user ->
             EmployeeDto(
-                id = it.uuid,
-                fullName = "${it.firstName} ${it.lastName}",
-                email = it.username,
-                location = it.tags.etablissement,
-                division = it.tags.agency,
-                manager = it.operationalManagerShortUsername?.let { managerFullName ->
+                id = user.uuid,
+                fullName = "${user.firstName} ${user.lastName}",
+                email = user.username,
+                location = user.tags?.etablissement,
+                division = user.tags?.agency,
+                manager = user.operationalManagerShortUsername?.let { managerFullName ->
                     ManagerDto(
                         fullName = managerFullName,
-                        email = it.operationalManagerShortUsername + "@zenika.com"
+                        email = "${user.operationalManagerShortUsername}@zenika.com"
                     )
                 }
             )
         }
-        return EmployeesDto(employees, employees.size)
+        return ResultForOneInstance(employees, employees.size)
     }
+
+    private fun applyDefaults(result: ResultForOneInstance, defaults: AlibeezInstanceDefaults) =
+        ResultForOneInstance(
+            employees = result.employees.map {
+                it.copy(
+                    location = it.location ?: defaults.location,
+                    division = it.division ?: defaults.division
+                )
+            }
+        )
 }
 
 data class AlibeezResponse(
@@ -69,7 +95,7 @@ data class AlibeezUser(
     val operationalManagerShortUsername: String?,
     val username: String,
     val arrivalDay: String,
-    val tags: AlibeezTags
+    val tags: AlibeezTags?
 )
 
 data class AlibeezTags(
@@ -77,17 +103,29 @@ data class AlibeezTags(
     val agency: String?
 )
 
-data class EmployeesDto(
-    val employees: List<EmployeeDto>,
-    val size: Int
+data class AlibeezError(
+    val errorCode: String,
+    val errorMessage: String
+)
+
+data class ResultForAllInstances(
+    val employees: List<EmployeeDto> = emptyList(),
+    val size: Int = 0,
+    val errors: Map<String, ErrorDto> = emptyMap()
 ) {
-    fun merge(other: EmployeesDto): EmployeesDto {
-        return EmployeesDto(
+    fun merge(other: ResultForOneInstance, errorKey: String): ResultForAllInstances =
+        ResultForAllInstances(
             employees = employees + other.employees,
-            size = employees.size + other.employees.size
+            size = size + other.size,
+            errors = other.error?.let { errors + (errorKey to it) } ?: errors
         )
-    }
 }
+
+data class ResultForOneInstance(
+    val employees: List<EmployeeDto> = emptyList(),
+    val size: Int = 0,
+    val error: ErrorDto? = null
+)
 
 data class EmployeeDto(
     val id: String,
@@ -101,4 +139,11 @@ data class EmployeeDto(
 data class ManagerDto(
     val fullName: String,
     val email: String
+)
+
+data class ErrorDto(
+    val statusCode: Int,
+    val statusText: String,
+    val errorCode: String,
+    val errorMessage: String
 )
