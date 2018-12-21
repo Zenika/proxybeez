@@ -17,10 +17,20 @@ class CurrentEmployeesResource(
 ) {
     @GetMapping("/current-employees")
     @Timed
-    fun get(): EmployeesDto {
+    fun get(): EmployeesDto =
+        listOf(
+            applicationProperties.alibeez.key,
+            applicationProperties.alibeez.keyCanada,
+            applicationProperties.alibeez.keySingapore
+        )
+            .filter { it.isNotEmpty() }
+            .map { getFromAlibeezWithKey(it) }
+            .reduce { employees, employeesForKey -> employees.merge(employeesForKey) }
+
+    private fun getFromAlibeezWithKey(key: String): EmployeesDto {
         val uri = UriComponentsBuilder.fromHttpUrl(applicationProperties.alibeez.baseUrl)
             .pathSegment("users")
-            .query(applicationProperties.alibeez.key)
+            .query(key)
             .queryParam("fields", "lastName,firstName,operationalManager,emailPro,tag.etablissement,tag.agency,arrivalDay,operationalManagerShortUsername")
             .queryParam("filter", "type==EMPLOYEE", "enabled==true")
             .build()
@@ -66,7 +76,14 @@ data class AlibeezTags(
 data class EmployeesDto(
     val employees: List<EmployeeDto>,
     val size: Int
-)
+) {
+    fun merge(other: EmployeesDto): EmployeesDto {
+        return EmployeesDto(
+            employees = employees + other.employees,
+            size = employees.size + other.employees.size
+        )
+    }
+}
 
 data class EmployeeDto(
     val fullName: String,

@@ -19,8 +19,26 @@ public class ApplicationProperties {
     public static class Alibeez {
         private String baseUrl = "";
         private String key = "";
+        private String keyCanada = "";
+        private String keySingapore = "";
 
-        public Alibeez() {
+        public String getKeyCanada() {
+            return keyCanada;
+        }
+
+        public void setKeyCanada(String keyCanada) {
+            this.keyCanada = keyCanada;
+        }
+
+        public String getKeySingapore() {
+            return keySingapore;
+        }
+
+        public void setKeySingapore(String keySingapore) {
+            this.keySingapore = keySingapore;
+        }
+
+        Alibeez() {
         }
 
         public String getBaseUrl() {
@@ -43,7 +61,7 @@ public class ApplicationProperties {
     public static class Tyk {
         private String token;
 
-        public Tyk() {
+        Tyk() {
         }
 
         public String getToken() {
@@ -59,7 +77,7 @@ public class ApplicationProperties {
         return alibeez;
     }
 
-    public Tyk getTyk() {
+    Tyk getTyk() {
         return tyk;
     }
 }
