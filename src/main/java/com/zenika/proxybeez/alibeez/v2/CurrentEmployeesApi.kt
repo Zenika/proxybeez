@@ -31,7 +31,7 @@ class CurrentEmployeesResource(
         val uri = UriComponentsBuilder.fromHttpUrl(applicationProperties.alibeez.baseUrl)
             .pathSegment("users")
             .query(key)
-            .queryParam("fields", "lastName,firstName,operationalManager,emailPro,tag.etablissement,tag.agency,arrivalDay,operationalManagerShortUsername")
+            .queryParam("fields", "uuid,lastName,firstName,operationalManager,username,tag.etablissement,tag.agency,arrivalDay,operationalManagerShortUsername")
             .queryParam("filter", "type==EMPLOYEE", "enabled==true")
             .build()
             .encode()
@@ -40,14 +40,17 @@ class CurrentEmployeesResource(
         val response = restTemplate.getForObject(uri, AlibeezResponse::class.java)
         val employees = response.result.map {
             EmployeeDto(
-                "${it.firstName} ${it.lastName}",
-                it.emailPro,
-                it.tags.etablissement,
-                it.tags.agency,
-                ManagerDto(
-                    it.operationalManager,
-                    it.operationalManagerShortUsername + "@zenika.com"
-                )
+                id = it.uuid,
+                fullName = "${it.firstName} ${it.lastName}",
+                email = it.username,
+                location = it.tags.etablissement,
+                division = it.tags.agency,
+                manager = it.operationalManagerShortUsername?.let { managerFullName ->
+                    ManagerDto(
+                        fullName = managerFullName,
+                        email = it.operationalManagerShortUsername + "@zenika.com"
+                    )
+                }
             )
         }
         return EmployeesDto(employees, employees.size)
@@ -59,18 +62,19 @@ data class AlibeezResponse(
 )
 
 data class AlibeezUser(
+    val uuid: String,
     val firstName: String,
     val lastName: String,
-    val operationalManager: String,
-    val operationalManagerShortUsername: String,
-    val emailPro: String,
+    val operationalManager: String?,
+    val operationalManagerShortUsername: String?,
+    val username: String,
     val arrivalDay: String,
     val tags: AlibeezTags
 )
 
 data class AlibeezTags(
-    val etablissement: String,
-    val agency: String
+    val etablissement: String?,
+    val agency: String?
 )
 
 data class EmployeesDto(
@@ -86,11 +90,12 @@ data class EmployeesDto(
 }
 
 data class EmployeeDto(
+    val id: String,
     val fullName: String,
     val email: String,
-    val location: String,
-    val division: String,
-    val manager: ManagerDto
+    val location: String?,
+    val division: String?,
+    val manager: ManagerDto?
 )
 
 data class ManagerDto(

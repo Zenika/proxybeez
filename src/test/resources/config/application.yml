@@ -107,3 +107,9 @@ jhipster:
 # ===================================================================
 
 application:
+    tyk:
+        token:
+    alibeez:
+        key:
+        keyCanada:
+        keySingapore:

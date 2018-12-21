@@ -38,7 +38,7 @@ public class ApplicationProperties {
             this.keySingapore = keySingapore;
         }
 
-        Alibeez() {
+        public Alibeez() {
         }
 
         public String getBaseUrl() {
@@ -61,7 +61,7 @@ public class ApplicationProperties {
     public static class Tyk {
         private String token;
 
-        Tyk() {
+        public Tyk() {
         }
 
         public String getToken() {
@@ -77,7 +77,7 @@ public class ApplicationProperties {
         return alibeez;
     }
 
-    Tyk getTyk() {
+    public Tyk getTyk() {
         return tyk;
     }
 }
