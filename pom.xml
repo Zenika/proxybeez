@@ -104,6 +104,14 @@
         <validation-api.version>1.1.0.Final</validation-api.version>
         <yarn.version>v0.24.6</yarn.version>
         <kotlin.version>1.2.51</kotlin.version>
+        <!--
+            This version of jackson-module-kotlin pulls
+            kotlin-reflect 1.2.51 (which the version of kotlin we
+            specified just above.
+
+            Be careful if you upgrade to keep kotlin-reflect at
+            the same version as the rest of the kotlin libs
+        -->
         <jackson.version>2.9.7</jackson.version>
     </properties>
 
