@@ -1,6 +1,5 @@
 package com.zenika.proxybeez;
 
-import com.zenika.proxybeez.alibeez.v2.AlibeezProperties;
 import com.zenika.proxybeez.config.ApplicationProperties;
 import com.zenika.proxybeez.config.DefaultProfileUtil;
 import io.github.jhipster.config.JHipsterConstants;
@@ -23,7 +22,7 @@ import java.util.Collection;
 
 @ComponentScan
 @EnableAutoConfiguration(exclude = {MetricFilterAutoConfiguration.class, MetricRepositoryAutoConfiguration.class})
-@EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class, AlibeezProperties.class})
+@EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
 public class ProxybeezApp {
 
     private static final Logger log = LoggerFactory.getLogger(ProxybeezApp.class);
