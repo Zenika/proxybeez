@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration
  * Java code cannot refer to Kotlin code. This means the
  * AlibeezProperties configuration properties class cannot
  * be referred to in ProxybeezApp. This is why ProxybeezAppKt
- * exists.
+ * exists. It's a Spring @Configuration class that can
+ * refer to Kotlin classes.
  */
 @Configuration
 @EnableConfigurationProperties(AlibeezProperties::class)
