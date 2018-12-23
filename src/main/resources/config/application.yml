@@ -103,9 +103,63 @@ jhipster:
 # https://jhipster.github.io/common-application-properties/
 # ===================================================================
 
+
 application:
-    alibeez:
-        base-url:
-        key:
     tyk:
         token:
+    alibeez:
+        # legacy Alibeez connector config for API v1
+        base-url: https://zenika.my.alibeez.com/api/query
+        key:
+        # newer Alibeez connector config for API v2
+        instances:
+            france:
+                base-url: https://zenika.my.alibeez.com/api/query
+                key: ${ALIBEEZ_KEY_FRANCE:}
+                fields:
+                    - uuid
+                    - lastName
+                    - firstName
+                    - operationalManager
+                    - username
+                    - tag.etablissement
+                    - tag.agency
+                    - arrivalDay
+                    - operationalManagerShortUsername
+                filters:
+                    - type==EMPLOYEE
+                    - enabled==true
+            canada:
+                base-url: https://zenika.my.alibeez.com/api/query
+                key: ${ALIBEEZ_KEY_CANADA:}
+                fields:
+                    - uuid
+                    - lastName
+                    - firstName
+                    - operationalManager
+                    - username
+                    - arrivalDay
+                    - operationalManagerShortUsername
+                filters:
+                    - type==EMPLOYEE
+                    - enabled==true
+                defaults:
+                    location: "Montreal"
+                    division: "Montreal"
+            singapore:
+                base-url: https://zenika.my.alibeez.com/api/query
+                key: ${ALIBEEZ_KEY_SINGAPORE:}
+                fields:
+                    - uuid
+                    - lastName
+                    - firstName
+                    - operationalManager
+                    - username
+                    - arrivalDay
+                    - operationalManagerShortUsername
+                filters:
+                    - type==EMPLOYEE
+                    - enabled==true
+                defaults:
+                    location: "Singapore"
+                    division: "Singapore"
