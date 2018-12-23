@@ -59,10 +59,11 @@ class CurrentEmployeesResource(
                 email = user.username,
                 location = user.tags?.etablissement,
                 division = user.tags?.agency,
-                manager = user.operationalManagerShortUsername?.let { managerFullName ->
+                manager = user.operationalManagerShortUsername?.let { operationalManagerShortUsername ->
                     ManagerDto(
-                        fullName = managerFullName,
-                        email = "${user.operationalManagerShortUsername}@zenika.com"
+                        email = "$operationalManagerShortUsername@zenika.com",
+                        // if short user name is present then this one is also present so it's safe to !! here
+                        fullName = user.operationalManager!!
                     )
                 }
             )
