@@ -185,7 +185,8 @@ public class WebConfigurer implements ServletContextInitializer, EmbeddedServlet
     private Predicate<String> paths() {
         return or(
                 regex("\\/api\\/absences.*"),
-                regex("\\/api\\/users.*"));
+                regex("\\/api\\/users.*"),
+                regex("\\/api\\/v2/.*"));
     }
 
     private ApiInfo apiInfo() {
