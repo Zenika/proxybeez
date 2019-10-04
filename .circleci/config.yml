@@ -34,7 +34,7 @@ jobs:
             WAR_PATH: *war_path
             DEPLOY_DIR: ~/deploy
             CLEVER_CLOUD_REMOTE_HOST: push-par-clevercloud-customers.services.clever-cloud.com
-            CLEVER_CLOUD_REMOTE_APP_ID: app_951ef043-3d74-41b6-a858-1370edee5ec9
+            CLEVER_CLOUD_REMOTE_APP_ID: app_a2f7d588-044c-4ab1-80b0-1fe60cd36475
         docker:
             - image: circleci/openjdk:8-jdk
         steps:
