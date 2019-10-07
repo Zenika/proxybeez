@@ -106,7 +106,7 @@ jhipster:
 
 application:
     security:
-        authorization:
+        security-key:
         secured-profiles: prod
     alibeez:
         # legacy Alibeez connector config for API v1
