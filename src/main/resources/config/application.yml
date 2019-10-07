@@ -105,8 +105,9 @@ jhipster:
 
 
 application:
-    tyk:
-        token:
+    security:
+        authorization:
+        secured-profiles: prod
     alibeez:
         # legacy Alibeez connector config for API v1
         base-url: https://zenika.my.alibeez.com/api/query
