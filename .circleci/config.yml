@@ -1,0 +1,43 @@
+version: 2.1
+
+executors:
+  main-executor:
+    docker:
+      - image: circleci/node:lts
+
+jobs:
+  quality-check:
+    executor: main-executor
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm run prettier:check
+      - run: npm run typecheck
+
+  deploy:
+    executor: main-executor
+    parameters:
+      clever-app-id:
+        type: string
+    steps:
+      - checkout
+      - run: |
+          sudo npm install --global clever-tools
+          clever login --token=$CLEVER_TOKEN --secret=$CLEVER_SECRET
+          clever link << parameters.clever-app-id >>
+          clever deploy --force
+
+workflows:
+  version: 2
+
+  deploy:
+    jobs:
+      - quality-check
+      - deploy:
+          clever-app-id: TODO
+          requires:
+            - quality-check
+          context: clever-cloud2-zenika-dev
+          filters:
+            branches:
+              only: master

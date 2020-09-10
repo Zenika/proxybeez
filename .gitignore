@@ -1,0 +1,5 @@
+.env
+*.txt
+users/
+node_modules/
+lastupdate
