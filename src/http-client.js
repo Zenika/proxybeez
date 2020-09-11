@@ -14,7 +14,7 @@ export async function okJsonRequest(url, options) {
 
 function request(url, options) {
   return new Promise((resolve, reject) => {
-    const req = https.request(url, options, (res) => {
+    const req = https.request(url, options || {}, (res) => {
       resolve(res);
     });
     req.on("error", reject);

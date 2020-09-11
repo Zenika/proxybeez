@@ -5,6 +5,7 @@ import {
   stringify as stringifyQuerystring,
 } from "querystring";
 import { okJsonRequest } from "./http-client.js";
+import { parseAlibeezParamsFromQuery } from "./utils.js";
 
 const CONFIG = JSON.parse(process.env.PROXYBEEZ_CONFIG);
 const ALIBEEZ_API_ROOT_URL = process.env.ALIBEEZ_API_ROOT_URL;
@@ -37,7 +38,7 @@ export function createServer() {
         res.writeHead(404).end();
         return;
       }
-      const alibeezParams = parseQuerystring(query);
+      const alibeezParams = parseAlibeezParamsFromQuery(query);
       let renderedUrl;
       try {
         renderedUrl = renderTemplate(url, alibeezParams);
