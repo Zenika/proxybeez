@@ -3,9 +3,12 @@ import {
   escape as escapeQuerystring,
 } from "querystring";
 
-
 export const parseAlibeezParamsFromQuery = (query) => {
-  const alibeezParams = parseQuerystring(query);
-  alibeezParams.username = escapeQuerystring(alibeezParams.username);
-  return alibeezParams;
+  return Object.entries(parseQuerystring(query)).reduce(
+    (previous, [key, value]) => ({
+      ...previous,
+      [key]: escapeQuerystring(value),
+    }),
+    {}
+  );
 };
