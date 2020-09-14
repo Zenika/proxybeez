@@ -3,12 +3,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "src/index.js",
     "dev": "nodemon --require dotenv/config --inspect src/index.js",
     "test": "node unit-testing.test.js",
     "prettier": "prettier '.circleci/config.yml'  'src/{**/,}*.{js,json}' '*.test.js'",
     "prettier:check": "npm run prettier -- --check",
     "prettier:write": "npm run prettier -- --write"
   },
+  "main": "src/index.js",
   "devDependencies": {
     "@types/node": "14.6.4",
     "dotenv": "8.2.0",
