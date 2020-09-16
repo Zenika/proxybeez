@@ -15,7 +15,7 @@ if (!ALIBEEZ_API_ROOT_URL) {
     `Environment variable ALIBEEZ_API_ROOT_URL: expected non-empty string but found '${process.env.ALIBEEZ_API_ROOT_URL}'`
   );
 }
-const ALIBEEZ_KEYS = (process.env.ALIBEEZ_KEYS || "").split(",");
+const ALIBEEZ_KEYS = JSON.parse(process.env.ALIBEEZ_KEYS);
 if (ALIBEEZ_KEYS.length === 0) {
   throw new Error(
     `Environment variable ALIBEEZ_KEYS: expected non-empty comma-separated list of strings but found '${process.env.ALIBEEZ_KEYS}'`
@@ -24,10 +24,13 @@ if (ALIBEEZ_KEYS.length === 0) {
 
 const handleAlibeezRequest = async ({ url, query, sortBy }) => {
   const alibeezParams = parseAlibeezParamsFromQuery(query);
-  let renderedUrl;
-  renderedUrl = renderTemplate(url, alibeezParams);
-
-  const results = await asyncFlatMap(ALIBEEZ_KEYS, async (key) => {
+  const [urlWithoutFields, rawFields] = url.split("fields=");
+  const fieldsList = rawFields?.split(",");
+  const results = await asyncFlatMap(ALIBEEZ_KEYS, async ({ key, ignore }) => {
+    const properFieldsUrl = `${urlWithoutFields}&fields=${fieldsList?.filter((field) =>
+      !ignore.includes(field)
+    )}`;
+    const renderedUrl = renderTemplate(properFieldsUrl, alibeezParams);
     const parsedUrl = parseUrl(renderedUrl);
     const urlWithKey = formatUrl({
       ...parsedUrl,
@@ -69,16 +72,22 @@ export function createServer() {
         return;
       }
       res.writeHead(200);
-      res.write(JSON.stringify(await memoizedHandleAlibeezRequest({ url, query, sortBy })));
+      res.write(
+        JSON.stringify(
+          await memoizedHandleAlibeezRequest({ url, query, sortBy })
+        )
+      );
       res.end();
     } catch (err) {
       console.error(
         `ERROR: Could not handle request '${req.method} ${req.url}'`,
         err
       );
-      if(err.response) {
+      if (err.response) {
         res.writeHead(err.response.statusCode);
-        res.write(JSON.stringify({ message: err.message, error: err.response.body }));
+        res.write(
+          JSON.stringify({ message: err.message, error: err.response.body })
+        );
         res.end();
         return;
       }
