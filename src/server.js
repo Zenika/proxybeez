@@ -27,8 +27,8 @@ const handleAlibeezRequest = async ({ url, query, sortBy }) => {
   const [urlWithoutFields, rawFields] = url.split("fields=");
   const fieldsList = rawFields?.split(",");
   const results = await asyncFlatMap(ALIBEEZ_KEYS, async ({ key, ignore }) => {
-    const properFieldsUrl = `${urlWithoutFields}&fields=${fieldsList?.filter((field) =>
-      !ignore.includes(field)
+    const properFieldsUrl = `${urlWithoutFields}&fields=${fieldsList?.filter(
+      (field) => !ignore.includes(field)
     )}`;
     const renderedUrl = renderTemplate(properFieldsUrl, alibeezParams);
     const parsedUrl = parseUrl(renderedUrl);
