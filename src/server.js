@@ -78,7 +78,7 @@ export function createServer() {
       );
       if(err.response) {
         res.writeHead(err.response.statusCode);
-        res.write(JSON.stringify({ message: err.message, error: JSON.parse(err.response.body) }));
+        res.write(JSON.stringify({ message: err.message, error: err.response.body }));
         res.end();
         return;
       }
