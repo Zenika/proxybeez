@@ -29,13 +29,19 @@ export function createServer() {
         return;
       }
       const { pathname, query } = parseUrl(req.url);
-      const { key, url, sortBy } = CONFIG[pathname] || {};
-      if (!key || !url) {
+      const { key, url, sortBy, mock } = CONFIG[pathname] || {};
+      if (!key || (!url && !mock)) {
         res.writeHead(404).end();
         return;
       }
       if (req.headers.authorization !== `Bearer ${key}`) {
         res.writeHead(404).end();
+        return;
+      }
+      if (mock) {
+        res.writeHead(200);
+        res.write(JSON.stringify(mock));
+        res.end();
         return;
       }
       const alibeezParams = parseAlibeezParamsFromQuery(query);
