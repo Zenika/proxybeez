@@ -68,29 +68,20 @@ export function createServer() {
         res.writeHead(401).end();
         return;
       }
-      try {
-        res.writeHead(200);
-        res.write(
-          JSON.stringify(
-            await memoizedHandleAlibeezRequest({ url, query, sortBy })
-          )
-        );
-        res.end();
-      } catch (err) {
-        console.error(
-          `ERROR: Could not handle request '${req.method} ${req.url}'`,
-          err
-        );
-        res.writeHead(400);
-        res.write(JSON.stringify({ error: err.message }));
-        res.end();
-        return;
-      }
+      res.writeHead(200);
+      res.write(JSON.stringify(await memoizedHandleAlibeezRequest({ url, query, sortBy })));
+      res.end();
     } catch (err) {
       console.error(
         `ERROR: Could not handle request '${req.method} ${req.url}'`,
         err
       );
+      if(err.response) {
+        res.writeHead(err.response.statusCode);
+        res.write(JSON.stringify({ message: err.message, error: JSON.parse(err.response.body) }));
+        res.end();
+        return;
+      }
       res.writeHead(500).end();
     }
   });
