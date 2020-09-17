@@ -28,9 +28,7 @@ const handleAlibeezRequest = async ({ url, query, sortBy }) => {
     const { filter, fields } = parseQuerystring(parseUrl(url).query);
     const computedUrl = `${pathname}?${
       typeof filter === "string" ? `filter=${filter}` : `filters=${filter}`
-    }&fields=${fields
-      .split(",")
-      .filter((field) => !ignore.includes(field))}`;
+    }&fields=${fields.split(",").filter((field) => !ignore.includes(field))}`;
     const renderedUrl = renderTemplate(computedUrl, alibeezParams);
     const parsedUrl = parseUrl(renderedUrl);
     const urlWithKey = formatUrl({
@@ -72,9 +70,7 @@ export function createServer() {
       }
       res.writeHead(200);
       res.write(
-        JSON.stringify(
-          await handleAlibeezRequest({ url, query, sortBy })
-        )
+        JSON.stringify(await handleAlibeezRequest({ url, query, sortBy }))
       );
       res.end();
     } catch (err) {
