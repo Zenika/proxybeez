@@ -6,7 +6,6 @@ import {
 } from "querystring";
 import { okJsonRequest } from "./http-client.js";
 import { parseAlibeezParamsFromQuery } from "./utils.js";
-import { memoize } from "./memoize.js";
 
 const CONFIG = JSON.parse(process.env.PROXYBEEZ_CONFIG);
 const ALIBEEZ_API_ROOT_URL = process.env.ALIBEEZ_API_ROOT_URL;
@@ -54,8 +53,6 @@ const handleAlibeezRequest = async ({ url, query, sortBy }) => {
   return results;
 };
 
-const memoizedHandleAlibeezRequest = memoize(handleAlibeezRequest);
-
 export function createServer() {
   return http.createServer(async (req, res) => {
     try {
@@ -76,7 +73,7 @@ export function createServer() {
       res.writeHead(200);
       res.write(
         JSON.stringify(
-          await memoizedHandleAlibeezRequest({ url, query, sortBy })
+          await handleAlibeezRequest({ url, query, sortBy })
         )
       );
       res.end();
