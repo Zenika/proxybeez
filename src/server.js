@@ -24,13 +24,15 @@ if (ALIBEEZ_KEYS.length === 0) {
 
 const handleAlibeezRequest = async ({ url, query, sortBy }) => {
   const alibeezParams = parseAlibeezParamsFromQuery(query);
-  const [urlWithoutFields, rawFields] = url.split("fields=");
-  const fieldsList = rawFields?.split(",");
+  const { pathname, query: params } = parseUrl(url);
   const results = await asyncFlatMap(ALIBEEZ_KEYS, async ({ key, ignore }) => {
-    const properFieldsUrl = `${urlWithoutFields}&fields=${fieldsList?.filter(
-      (field) => !ignore.includes(field)
-    )}`;
-    const renderedUrl = renderTemplate(properFieldsUrl, alibeezParams);
+    const { filter, fields } = parseQuerystring(parseUrl(url).query);
+    const computedUrl = `${pathname}?${
+      typeof filter === "string" ? `filter=${filter}` : `filters=${filter}`
+    }&fields=${fields
+      .split(",")
+      .filter((field) => !ignore.includes(field))}`;
+    const renderedUrl = renderTemplate(computedUrl, alibeezParams);
     const parsedUrl = parseUrl(renderedUrl);
     const urlWithKey = formatUrl({
       ...parsedUrl,
