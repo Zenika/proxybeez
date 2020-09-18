@@ -1,4 +1,4 @@
-import { parseAlibeezParamsFromQuery, computeUrlWithKey } from "./src/utils.js";
+import { computeUrlWithKey } from "./src/utils.js";
 
 const isQueryEscapedCorrectly = () => {
   const baseUrl = "https://test.test/api";

@@ -21,16 +21,6 @@ function renderTemplate(template, vars) {
   });
 }
 
-export const parseAlibeezParamsFromQuery = (query) => {
-  return Object.entries(parseQuerystring(query)).reduce(
-    (previous, [key, value]) => ({
-      ...previous,
-      [key]: value,
-    }),
-    {}
-  );
-};
-
 export const computeUrlWithKey = (
   baseUrl,
   configUrl,

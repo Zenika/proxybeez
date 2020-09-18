@@ -1,11 +1,8 @@
 import * as http from "http";
+import { parse as parseQuerystring } from "querystring";
 import { parse as parseUrl } from "url";
 import { okJsonRequest } from "./http-client.js";
-import {
-  asyncFlatMap,
-  computeUrlWithKey,
-  parseAlibeezParamsFromQuery,
-} from "./utils.js";
+import { asyncFlatMap, computeUrlWithKey } from "./utils.js";
 
 const CONFIG = JSON.parse(process.env.PROXYBEEZ_CONFIG);
 const ALIBEEZ_API_ROOT_URL = process.env.ALIBEEZ_API_ROOT_URL;
@@ -22,7 +19,7 @@ if (ALIBEEZ_KEYS.length === 0) {
 }
 
 const handleAlibeezRequest = async ({ url, query, sortBy }) => {
-  const alibeezParams = parseAlibeezParamsFromQuery(query);
+  const alibeezParams = parseQuerystring(query);
   const results = await asyncFlatMap(ALIBEEZ_KEYS, async ({ key, ignore }) => {
     const urlWithKey = computeUrlWithKey(
       ALIBEEZ_API_ROOT_URL,
@@ -56,7 +53,7 @@ export function createServer() {
         return;
       }
       if (req.headers.authorization !== `Bearer ${key}`) {
-        res.writeHead(401).end();
+        res.writeHead(404).end();
         return;
       }
       res.writeHead(200);
