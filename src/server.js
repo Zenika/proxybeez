@@ -1,11 +1,7 @@
 import * as http from "http";
-import { parse as parseUrl, format as formatUrl } from "url";
-import {
-  parse as parseQuerystring,
-  stringify as stringifyQuerystring,
-} from "querystring";
+import { parse as parseUrl } from "url";
 import { okJsonRequest } from "./http-client.js";
-import { parseAlibeezParamsFromQuery } from "./utils.js";
+import { asyncFlatMap, computeUrlWithKey, parseAlibeezParamsFromQuery } from "./utils.js";
 
 const CONFIG = JSON.parse(process.env.PROXYBEEZ_CONFIG);
 const ALIBEEZ_API_ROOT_URL = process.env.ALIBEEZ_API_ROOT_URL;
@@ -23,24 +19,15 @@ if (ALIBEEZ_KEYS.length === 0) {
 
 const handleAlibeezRequest = async ({ url, query, sortBy }) => {
   const alibeezParams = parseAlibeezParamsFromQuery(query);
-  const { pathname, query: params } = parseUrl(url);
   const results = await asyncFlatMap(ALIBEEZ_KEYS, async ({ key, ignore }) => {
-    const { filter, fields } = parseQuerystring(parseUrl(url).query);
-    const computedUrl = `${pathname}?${
-      typeof filter === "string" ? `filter=${filter}` : `filters=${filter}`
-    }&fields=${fields.split(",").filter((field) => !ignore.includes(field))}`;
-    const renderedUrl = renderTemplate(computedUrl, alibeezParams);
-    const parsedUrl = parseUrl(renderedUrl);
-    const urlWithKey = formatUrl({
-      ...parsedUrl,
-      search: stringifyQuerystring({
-        ...parseQuerystring(parsedUrl.query),
-        key,
-      }),
-    });
-    const { result } = await okJsonRequest(
-      `${ALIBEEZ_API_ROOT_URL}${urlWithKey}`
+    const urlWithKey = computeUrlWithKey(
+      ALIBEEZ_API_ROOT_URL,
+      url,
+      alibeezParams,
+      ignore,
+      key
     );
+    const { result } = await okJsonRequest(urlWithKey);
     return result;
   });
   if (sortBy) {
@@ -87,26 +74,6 @@ export function createServer() {
         return;
       }
       res.writeHead(500).end();
-    }
-  });
-}
-
-async function asyncFlatMap(arr, fn) {
-  const results = [];
-  for (const element of arr) {
-    for (const result of await fn(element)) {
-      results.push(result);
-    }
-  }
-  return results;
-}
-
-function renderTemplate(template, vars) {
-  return template.replace(/\${(.*?)}/g, (_, $1) => {
-    if ($1 in vars) {
-      return vars[$1];
-    } else {
-      throw new Error(`Cannot render template: missing value for key '${$1}'`);
     }
   });
 }
