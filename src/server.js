@@ -1,7 +1,11 @@
 import * as http from "http";
 import { parse as parseUrl } from "url";
 import { okJsonRequest } from "./http-client.js";
-import { asyncFlatMap, computeUrlWithKey, parseAlibeezParamsFromQuery } from "./utils.js";
+import {
+  asyncFlatMap,
+  computeUrlWithKey,
+  parseAlibeezParamsFromQuery,
+} from "./utils.js";
 
 const CONFIG = JSON.parse(process.env.PROXYBEEZ_CONFIG);
 const ALIBEEZ_API_ROOT_URL = process.env.ALIBEEZ_API_ROOT_URL;

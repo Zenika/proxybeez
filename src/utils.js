@@ -1,6 +1,4 @@
-import {
-  parse as parseQuerystring,
-} from "querystring";
+import { parse as parseQuerystring } from "querystring";
 import { parse as parseUrl } from "url";
 
 export async function asyncFlatMap(arr, fn) {
@@ -33,7 +31,13 @@ export const parseAlibeezParamsFromQuery = (query) => {
   );
 };
 
-export const computeUrlWithKey = (baseUrl, configUrl, alibeezParams, ignore, key) => {
+export const computeUrlWithKey = (
+  baseUrl,
+  configUrl,
+  alibeezParams,
+  ignore,
+  key
+) => {
   const { pathname } = parseUrl(configUrl);
   const { filter, fields } = parseQuerystring(parseUrl(configUrl).query);
   const urlWithKey = new URL(`${baseUrl}${pathname}`);
