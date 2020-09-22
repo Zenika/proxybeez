@@ -38,7 +38,7 @@ async function parseBodyAsText(response) {
   return body;
 }
 
-export function hasJsonBody(response) {
+function hasJsonBody(response) {
   return (response.headers["content-type"] || "").includes("json");
 }
 

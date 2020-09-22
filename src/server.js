@@ -1,80 +1,138 @@
 import * as http from "http";
-import { parse as parseQuerystring } from "querystring";
-import { parse as parseUrl } from "url";
+import * as requestProcessors from "./request-processors.js";
+import * as responseProcessors from "./response-processors.js";
 import { okJsonRequest } from "./http-client.js";
-import { asyncFlatMap, computeUrlWithKey } from "./utils.js";
 
-const CONFIG = JSON.parse(process.env.PROXYBEEZ_CONFIG);
-const ALIBEEZ_API_ROOT_URL = process.env.ALIBEEZ_API_ROOT_URL;
-if (!ALIBEEZ_API_ROOT_URL) {
-  throw new Error(
-    `Environment variable ALIBEEZ_API_ROOT_URL: expected non-empty string but found '${process.env.ALIBEEZ_API_ROOT_URL}'`
-  );
-}
-const ALIBEEZ_KEYS = JSON.parse(process.env.ALIBEEZ_KEYS);
-if (ALIBEEZ_KEYS.length === 0) {
-  throw new Error(
-    `Environment variable ALIBEEZ_KEYS: expected non-empty comma-separated list of strings but found '${process.env.ALIBEEZ_KEYS}'`
-  );
-}
-
-const handleAlibeezRequest = async ({ url, query, sortBy }) => {
-  const alibeezParams = parseQuerystring(query);
-  const results = await asyncFlatMap(ALIBEEZ_KEYS, async ({ key, ignore }) => {
-    const urlWithKey = computeUrlWithKey(
-      ALIBEEZ_API_ROOT_URL,
-      url,
-      alibeezParams,
-      ignore,
-      key
-    );
-    const { result } = await okJsonRequest(urlWithKey);
-    return result;
-  });
-  if (sortBy) {
-    results.sort((result1, result2) => {
-      return result1[sortBy].localeCompare(result2[sortBy]);
-    });
-  }
-  return results;
-};
+const CONFIG = parseConfig(process.env.PROXYBEEZ_CONFIG);
 
 export function createServer() {
-  return http.createServer(async (req, res) => {
+  return http.createServer(handleRequest);
+}
+
+async function handleRequest(req, res) {
+  try {
+    const incomingUrl = new URL(req.url, "http://example.com");
+    const pathConfig = CONFIG.requests[incomingUrl.pathname];
+    if (!pathConfig) {
+      res.writeHead(404).end();
+      return;
+    }
+    if (req.headers.authorization !== `Bearer ${pathConfig.key}`) {
+      res.writeHead(404).end();
+      return;
+    }
+    let outgoingUrl;
     try {
-      if (req.method !== "GET") {
-        res.writeHead(405).end();
-        return;
-      }
-      const { pathname, query } = parseUrl(req.url);
-      const { key, url, sortBy } = CONFIG[pathname] || {};
-      if (!key || !url) {
-        res.writeHead(404).end();
-        return;
-      }
-      if (req.headers.authorization !== `Bearer ${key}`) {
-        res.writeHead(404).end();
-        return;
-      }
-      res.writeHead(200);
+      outgoingUrl = renderOutgoingUrl(
+        CONFIG.alibeez.baseUrl,
+        pathConfig.url,
+        incomingUrl.searchParams
+      );
+    } catch (err) {
+      res.writeHead(400);
       res.write(
-        JSON.stringify(await handleAlibeezRequest({ url, query, sortBy }))
+        JSON.stringify({
+          error: true,
+          title: "Missing query parameter",
+          missingQueryParameter: err.key,
+        })
       );
       res.end();
-    } catch (err) {
-      console.error(
-        `ERROR: Could not handle request '${req.method} ${req.url}'`,
-        err
+      return;
+    }
+    if (pathConfig.mock) {
+      res.writeHead(200);
+      res.write(JSON.stringify(pathConfig.mock));
+      res.end();
+      return;
+    }
+    const responses = await requestAlibeezTenants(
+      outgoingUrl,
+      CONFIG.alibeez.tenants
+    );
+    const response = mergeTenantResponses(responses);
+    res.writeHead(200);
+    res.write(JSON.stringify(response));
+    res.end();
+  } catch (err) {
+    res.writeHead(500);
+    res.write(JSON.stringify({ error: true, message: err.message }));
+    res.end();
+  }
+}
+
+function parseConfig(stringConfig) {
+  try {
+    return JSON.parse(stringConfig);
+  } catch (err) {
+    throw new Error(`Cannot parse config as JSON: ${err.message}`);
+  }
+}
+
+function renderOutgoingUrl(baseUrl, template, params) {
+  return (
+    baseUrl + renderTemplate(template, convertSearchParamsToObject(params))
+  );
+}
+
+function convertSearchParamsToObject(searchParams) {
+  const result = {};
+  for (const key of searchParams.keys()) {
+    result[key] = searchParams.getAll(key);
+  }
+  return result;
+}
+
+function renderTemplate(template, vars) {
+  return template.replace(/\${(.*?)}/g, (_, $1) => {
+    if ($1 in vars) {
+      return vars[$1];
+    } else {
+      throw Object.assign(
+        new Error(`Cannot render template: missing value for key '${$1}'`),
+        { key: $1 }
       );
-      if (err.response) {
-        res.writeHead(err.response.statusCode);
-        res.write(
-          JSON.stringify({ message: err.message, error: err.response.body })
-        );
-        res.end();
-        return;
-      }
-      res.writeHead(500).end();
     }
   });
+}
+
+function requestAlibeezTenants(url, tenants) {
+  return asyncMap(
+    Object.values(tenants),
+    async ({ requestProcessors = [], responseProcessors = [] }) => {
+      const processedUrl = requestProcessors.reduce(runRequestProcessor, url);
+      const response = await requestAlibeezTenant(processedUrl);
+      const processedResponse = responseProcessors.reduce(
+        runResponseProcessors,
+        response
+      );
+      return processedResponse;
+    }
+  );
+}
+
+async function asyncMap(arr, fn) {
+  const results = [];
+  for (const element of arr) {
+    results.push(await fn(element));
+  }
+  return results;
+}
+
+function runRequestProcessor(url, processorConfig) {
+  const [id, config] = Object.entries(processorConfig)[0];
+  return requestProcessors[id](url, config);
+}
+
+function runResponseProcessors(response, processorConfig) {
+  const [id, config] = Object.entries(processorConfig)[0];
+  return responseProcessors[id](response, config);
+}
+
+function requestAlibeezTenant(url) {
+  return okJsonRequest(url);
+}
+
+function mergeTenantResponses(responses) {
+  return responses.flatMap((response) => response.result);
 }
