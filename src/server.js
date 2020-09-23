@@ -69,12 +69,24 @@ function parseConfig(stringConfig) {
   }
 }
 
+/**
+ *
+ * @param {string} baseUrl
+ * @param {string} template
+ * @param {URLSearchParams} params
+ * @returns {string}
+ */
 function renderOutgoingUrl(baseUrl, template, params) {
   return (
     baseUrl + renderTemplate(template, convertSearchParamsToObject(params))
   );
 }
 
+/**
+ *
+ * @param {URLSearchParams} searchParams
+ * @returns {object}
+ */
 function convertSearchParamsToObject(searchParams) {
   const result = {};
   for (const key of searchParams.keys()) {
@@ -83,6 +95,12 @@ function convertSearchParamsToObject(searchParams) {
   return result;
 }
 
+/**
+ *
+ * @param {string} template
+ * @param {object} vars
+ * @returns {string}
+ */
 function renderTemplate(template, vars) {
   return template.replace(/\${(.*?)}/g, (_, $1) => {
     if ($1 in vars) {
@@ -96,6 +114,11 @@ function renderTemplate(template, vars) {
   });
 }
 
+/**
+ *
+ * @param {string} url
+ * @param {object} tenants
+ */
 function requestAlibeezTenants(url, tenants) {
   return asyncMap(
     Object.values(tenants),
@@ -111,6 +134,13 @@ function requestAlibeezTenants(url, tenants) {
   );
 }
 
+/**
+ *
+ * @template T, R
+ * @param {Iterable<T>} arr
+ * @param {(t: T) => R} fn
+ * @returns {Promise<Array<R>>}
+ */
 async function asyncMap(arr, fn) {
   const results = [];
   for (const element of arr) {

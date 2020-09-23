@@ -1,8 +1,12 @@
 import * as http from "http";
 import * as https from "https";
 
-export async function okJsonRequest(url, options) {
-  const response = await okOrThrow(await request(url, options));
+/**
+ *
+ * @param {string | URL} url
+ */
+export async function okJsonRequest(url) {
+  const response = await okOrThrow(await request(url), url);
   if (!hasJsonBody(response)) {
     console.warn(
       `WARN: Parsing body as JSON but Content-Type is '${response.headers["content-type"]}'`
@@ -12,9 +16,13 @@ export async function okJsonRequest(url, options) {
   return JSON.parse(text);
 }
 
-function request(url, options) {
+/**
+ *
+ * @param {string | URL} url
+ */
+function request(url) {
   return new Promise((resolve, reject) => {
-    const req = https.request(url, options || {}, (res) => {
+    const req = https.request(url, {}, (res) => {
       resolve(res);
     });
     req.on("error", reject);
@@ -22,14 +30,24 @@ function request(url, options) {
   });
 }
 
-async function okOrThrow(response, requestOptions) {
+/**
+ *
+ * @param {http.IncomingMessage} response
+ * @returns {Promise<http.IncomingMessage>}
+ */
+async function okOrThrow(response, url) {
   if (response.statusCode === 200) {
     return response;
   } else {
-    throw await HttpClientError.of(requestOptions, response);
+    throw await HttpClientError.of(url, response);
   }
 }
 
+/**
+ *
+ * @param {http.IncomingMessage} response
+ * @returns {Promise<string>}
+ */
 async function parseBodyAsText(response) {
   let body = null;
   for await (const chunk of response) {
@@ -38,6 +56,11 @@ async function parseBodyAsText(response) {
   return body;
 }
 
+/**
+ *
+ * @param {http.IncomingMessage} response
+ * @returns {boolean}
+ */
 function hasJsonBody(response) {
   return (response.headers["content-type"] || "").includes("json");
 }
@@ -45,12 +68,11 @@ function hasJsonBody(response) {
 export class HttpClientError extends Error {
   /**
    *
-   * @param {https.RequestOptions} requestOptions
    * @param {http.IncomingMessage} response
    */
-  static async of(requestOptions, response) {
+  static async of(url, response) {
     const responseBody = await parseBodyAsText(response);
-    return new HttpClientError(requestOptions, {
+    return new HttpClientError(url, {
       statusCode: response.statusCode,
       headers: response.headers,
       body: responseBody,
@@ -59,12 +81,12 @@ export class HttpClientError extends Error {
 
   /**
    *
-   * @param {https.RequestOptions} requestOptions
+   * @param {string | URL} url
    * @param {{ statusCode: number, headers: http.IncomingHttpHeaders, body: string }} response
    */
-  constructor(requestOptions, response) {
+  constructor(url, response) {
     super("External HTTP service responded with error status code");
-    this.requestOptions = requestOptions;
+    this.url = url;
     this.response = response;
   }
 
