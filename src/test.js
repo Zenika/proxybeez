@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import { renderOutgoingUrl } from "./server.js";
+import { insertKey } from "./request-processors.js";
 import { defaultFields } from "./response-processors.js";
 
 (() => {
@@ -39,5 +40,26 @@ import { defaultFields } from "./response-processors.js";
     actual,
     expected,
     "'defaultFields' overrides fields that already have a value"
+  );
+})();
+
+(() => {
+  const keyValue = "the_key";
+  const actual = insertKey("http://example.com", keyValue);
+  assert.ok(actual.searchParams.has("key"));
+  assert.strictEqual(
+    actual.searchParams.get("key"),
+    keyValue,
+    "'insertKey' does not insert a 'key' search param"
+  );
+})();
+
+(() => {
+  const keyValue = "the_key";
+  const actual = insertKey("http://example.com", keyValue);
+  assert.strictEqual(
+    actual.searchParams.get("key"),
+    keyValue,
+    "'insertKey' does not insert the correct key value"
   );
 })();
