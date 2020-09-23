@@ -6,31 +6,14 @@ executors:
       - image: circleci/node:lts
 
 jobs:
-  install-dependencies:
-    executor: main-executor
-    steps:
-      - checkout
-      - run: npm ci
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - node_modules
-
   quality-check:
     executor: main-executor
     steps:
       - checkout
-      - attach_workspace:
-          at: ./
+      - run: npm ci
       - run: npm run prettier:check
-
-  test:
-    executor: main-executor
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ./
-      - run: npm run test
+      - run: npm run typecheck
+      - run: npm test
 
   deploy:
     executor: main-executor
@@ -50,17 +33,7 @@ workflows:
 
   deploy:
     jobs:
-      - install-dependencies:
-          filters:
-            tags:
-              only: /.*/
       - quality-check:
-          requires:
-            - install-dependencies
-          filters:
-            tags:
-              only: /.*/
-      - test:
           requires:
             - install-dependencies
           filters:
@@ -70,10 +43,9 @@ workflows:
           clever-app-id: app_b2928a5b-2ffd-41d9-b15f-3d3ee3d779dc
           requires:
             - quality-check
-            - test
           context: clever-cloud2-zenika-dev
           filters:
             branches:
-              only: rewrite
+              only: rerewrite
             tags:
               ignore: /.*/
