@@ -1,5 +1,6 @@
 import * as assert from "assert";
 import { renderOutgoingUrl } from "./server.js";
+import { defaultFields } from "./response-processors.js";
 
 (() => {
   const actual = renderOutgoingUrl(
@@ -12,5 +13,31 @@ import { renderOutgoingUrl } from "./server.js";
     actual,
     expected,
     "renderOutgoingUrl might be vulnerable to injection attacks"
+  );
+})();
+
+(() => {
+  const actual = defaultFields(
+    { result: [{}] },
+    { "tag.etablissement": "Singapore" }
+  );
+  const expected = { result: [{ "tag.etablissement": "Singapore" }] };
+  assert.deepStrictEqual(
+    actual,
+    expected,
+    "'defaultFields' does not fill fields with defaults"
+  );
+})();
+
+(() => {
+  const actual = defaultFields(
+    { result: [{ "tag.etablissement": "Nantes" }] },
+    { "tag.etablissement": "Singapore" }
+  );
+  const expected = { result: [{ "tag.etablissement": "Nantes" }] };
+  assert.deepStrictEqual(
+    actual,
+    expected,
+    "'defaultFields' overrides fields that already have a value"
   );
 })();
