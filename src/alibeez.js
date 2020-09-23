@@ -1,5 +1,5 @@
-import asyncMap from "./asyncMap.js";
-import request from "./httpClient.js";
+import asyncMap from "./utils/asyncMap.js";
+import request from "./utils/httpClient.js";
 import * as requestProcessors from "./requestProcessors/requestProcessors.js";
 import * as responseProcessors from "./responseProcessors/responseProcessors.js";
 
