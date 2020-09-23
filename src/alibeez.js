@@ -24,27 +24,29 @@ function requestAlibeezTenants(url, tenants) {
 }
 
 function requestAlibeezTenant(url) {
-  return async ({ requestProcessors = [], responseProcessors = [] }) => {
-    const processedUrl = requestProcessors.reduce(runRequestProcessor, url);
+  return async (tenant) => {
+    const processedUrl = runProcessors(
+      url,
+      tenant.requestProcessors,
+      requestProcessors
+    );
     const response = await request(processedUrl);
-    const processedResponse = responseProcessors.reduce(
-      runResponseProcessors,
-      response
+    const processedResponse = runProcessors(
+      response,
+      tenant.responseProcessors,
+      responseProcessors
     );
     return processedResponse;
   };
 }
 
+function runProcessors(initialInput, configs = [], processors) {
+  return configs.reduce((input, config) => {
+    const [id, arg] = Object.entries(config)[0];
+    return processors[id](input, arg);
+  }, initialInput);
+}
+
 function mergeTenantResponses(responses) {
   return responses.flatMap((response) => response.result);
-}
-
-function runRequestProcessor(url, processorConfig) {
-  const [id, config] = Object.entries(processorConfig)[0];
-  return requestProcessors[id](url, config);
-}
-
-function runResponseProcessors(response, processorConfig) {
-  const [id, config] = Object.entries(processorConfig)[0];
-  return responseProcessors[id](response, config);
 }
