@@ -7,7 +7,7 @@
     "start": "node src/index.js",
     "test": "node src/test.js",
     "typecheck": "tsc",
-    "prettier": "prettier '.circleci/config.yml'  'src/{**/,}*.{js,json}' '*.test.{js,json}'",
+    "prettier": "prettier '.circleci/config.yml'  '*.json' 'src/{**/,}*.js'",
     "prettier:check": "npm run prettier -- --check",
     "prettier:write": "npm run prettier -- --write"
   },
