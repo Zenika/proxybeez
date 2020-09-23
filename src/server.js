@@ -29,7 +29,7 @@ const handleRequest = (config) => async (req, res) => {
     }
     let outgoingUrl;
     try {
-      outgoingUrl = renderOutgoingUrl(pathConfig.url, incomingUrl.searchParams);
+      outgoingUrl = renderOutgoingPath(pathConfig.path, incomingUrl.searchParams);
     } catch (err) {
       return badRequest(res, `Missing query parameter: ${err.key}`);
     }
@@ -49,7 +49,7 @@ const handleRequest = (config) => async (req, res) => {
  * @param {URLSearchParams} params
  * @returns {string}
  */
-export function renderOutgoingUrl(template, params) {
+export function renderOutgoingPath(template, params) {
   return interpolate(template, convertSearchParamsToObject(params));
 }
 
