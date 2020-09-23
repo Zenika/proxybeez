@@ -5,7 +5,7 @@ import * as https from "https";
  *
  * @param {string | URL} url
  */
-export async function okJsonRequest(url) {
+export default async function okJsonRequest(url) {
   const response = await okOrThrow(await request(url), url);
   if (!hasJsonBody(response)) {
     console.warn(
