@@ -1,6 +1,13 @@
 import * as http from "http";
 import * as querystring from "querystring";
 import { requestAlibeez } from "./alibeez.js";
+import {
+  ok,
+  badRequest,
+  notFound,
+  unauthorized,
+  serverError,
+} from "./utils/httpServer.js";
 import interpolate from "./utils/interpolate.js";
 
 export function createServer(config) {
@@ -12,42 +19,24 @@ const handleRequest = (config) => async (req, res) => {
     const incomingUrl = new URL(req.url, "http://example.com");
     const pathConfig = config.requests[incomingUrl.pathname];
     if (!pathConfig) {
-      res.writeHead(404).end();
-      return;
+      return notFound(res);
     }
     if (req.headers.authorization !== `Bearer ${pathConfig.key}`) {
-      res.writeHead(404).end();
-      return;
+      return unauthorized(res);
     }
     let outgoingUrl;
     try {
       outgoingUrl = renderOutgoingUrl(pathConfig.url, incomingUrl.searchParams);
     } catch (err) {
-      res.writeHead(400);
-      res.write(
-        JSON.stringify({
-          error: true,
-          title: "Missing query parameter",
-          missingQueryParameter: err.key,
-        })
-      );
-      res.end();
-      return;
+      return badRequest(res, `Missing query parameter: ${err.key}`);
     }
     if (pathConfig.mock) {
-      res.writeHead(200);
-      res.write(JSON.stringify(pathConfig.mock));
-      res.end();
-      return;
+      return ok(res, pathConfig.mock);
     }
     const response = await requestAlibeez(outgoingUrl, config.alibeez);
-    res.writeHead(200);
-    res.write(JSON.stringify(response));
-    res.end();
+    return ok(res, response);
   } catch (err) {
-    res.writeHead(500);
-    res.write(JSON.stringify({ error: true, message: err.message }));
-    res.end();
+    return serverError(res, req, err);
   }
 };
 
