@@ -1,8 +1,11 @@
 import * as http from "http";
 import * as querystring from "querystring";
-import * as requestProcessors from "./request-processors.js";
-import * as responseProcessors from "./response-processors.js";
+import * as requestProcessors from "./requestProcessors/requestProcessors.js";
+import * as responseProcessors from "./responseProcessors/responseProcessors.js";
 import { okJsonRequest } from "./http-client.js";
+import renderTemplate from "./renderTemplate.js"
+import asyncMap from "./asyncMap.js"
+
 
 export function createServer(config) {
   return http.createServer(handleRequest(config));
@@ -90,25 +93,6 @@ function convertSearchParamsToObject(searchParams) {
 
 /**
  *
- * @param {string} template
- * @param {object} vars
- * @returns {string}
- */
-export function renderTemplate(template, vars) {
-  return template.replace(/\${(.*?)}/g, (_, $1) => {
-    if ($1 in vars) {
-      return vars[$1];
-    } else {
-      throw Object.assign(
-        new Error(`Cannot render template: missing value for key '${$1}'`),
-        { key: $1 }
-      );
-    }
-  });
-}
-
-/**
- *
  * @param {string} url
  * @param {object} tenants
  */
@@ -125,21 +109,6 @@ function requestAlibeezTenants(url, tenants) {
       return processedResponse;
     }
   );
-}
-
-/**
- *
- * @template T, R
- * @param {Iterable<T>} arr
- * @param {(t: T) => R} fn
- * @returns {Promise<Array<R>>}
- */
-async function asyncMap(arr, fn) {
-  const results = [];
-  for (const element of arr) {
-    results.push(await fn(element));
-  }
-  return results;
 }
 
 function runRequestProcessor(url, processorConfig) {
