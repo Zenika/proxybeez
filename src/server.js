@@ -94,7 +94,7 @@ function convertSearchParamsToObject(searchParams) {
  * @param {object} vars
  * @returns {string}
  */
-function renderTemplate(template, vars) {
+export function renderTemplate(template, vars) {
   return template.replace(/\${(.*?)}/g, (_, $1) => {
     if ($1 in vars) {
       return vars[$1];

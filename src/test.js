@@ -1,9 +1,45 @@
 import * as assert from "assert";
-import { renderOutgoingUrl } from "./server.js";
+import { renderOutgoingUrl, renderTemplate } from "./server.js";
 import { excludeFields, insertKey } from "./request-processors.js";
 import { defaultFields } from "./response-processors.js";
 
-(() => {
+{
+  const actual = renderTemplate("${var}", { var: "varValue" });
+  const expected = "varValue";
+  assert.strictEqual(
+    actual,
+    expected,
+    "'renderTemplate' cannot interpolate a single variable in a string with nothing else in it"
+  );
+}
+
+{
+  const actual = renderTemplate("this is the value: ${var};", {
+    var: "varValue",
+  });
+  const expected = "this is the value: varValue;";
+  assert.strictEqual(
+    actual,
+    expected,
+    "'renderTemplate' cannot interpolate a single variable in a string with static content around it"
+  );
+}
+
+{
+  const actual = renderTemplate(
+    "this is the value: ${var}; this is another value ${val};",
+    { var: "varValue", val: "valValue" }
+  );
+  const expected =
+    "this is the value: varValue; this is another value valValue;";
+  assert.strictEqual(
+    actual,
+    expected,
+    "'renderTemplate' cannot interpolate multiple variables in a string with static content around them"
+  );
+}
+
+{
   const actual = renderOutgoingUrl(
     "http://example.com",
     "/path?param=${param}",
@@ -13,11 +49,11 @@ import { defaultFields } from "./response-processors.js";
   assert.strictEqual(
     actual,
     expected,
-    "renderOutgoingUrl might be vulnerable to injection attacks"
+    "'renderOutgoingUrl' might be vulnerable to injection attacks"
   );
-})();
+}
 
-(() => {
+{
   const actual = defaultFields(
     { result: [{}] },
     { "tag.etablissement": "Singapore" }
@@ -28,9 +64,9 @@ import { defaultFields } from "./response-processors.js";
     expected,
     "'defaultFields' does not fill fields with defaults"
   );
-})();
+}
 
-(() => {
+{
   const actual = defaultFields(
     { result: [{ "tag.etablissement": "Nantes" }] },
     { "tag.etablissement": "Singapore" }
@@ -41,9 +77,9 @@ import { defaultFields } from "./response-processors.js";
     expected,
     "'defaultFields' overrides fields that already have a value"
   );
-})();
+}
 
-(() => {
+{
   const actual = excludeFields("http://example.com?fields=excluded", [
     "excluded",
   ]);
@@ -52,9 +88,9 @@ import { defaultFields } from "./response-processors.js";
     /excluded/,
     "'excludeFields' cannot exclude the only field"
   );
-})();
+}
 
-(() => {
+{
   const actual = excludeFields(
     "http://example.com?fields=included,excluded,alsoIncluded",
     ["excluded"]
@@ -64,9 +100,9 @@ import { defaultFields } from "./response-processors.js";
     /excluded/,
     "'excludeFields' cannot exclude one field among multiple"
   );
-})();
+}
 
-(() => {
+{
   const actual = excludeFields(
     "http://example.com?fields=included,alsoIncluded",
     ["excluded"]
@@ -76,9 +112,9 @@ import { defaultFields } from "./response-processors.js";
     /included,alsoIncluded/,
     "'excludeFields' excludes fields that it should not"
   );
-})();
+}
 
-(() => {
+{
   const keyValue = "the_key";
   const actual = insertKey("http://example.com", keyValue);
   assert.ok(actual.searchParams.has("key"));
@@ -87,9 +123,9 @@ import { defaultFields } from "./response-processors.js";
     keyValue,
     "'insertKey' does not insert a 'key' search param"
   );
-})();
+}
 
-(() => {
+{
   const keyValue = "the_key";
   const actual = insertKey("http://example.com", keyValue);
   assert.strictEqual(
@@ -97,4 +133,4 @@ import { defaultFields } from "./response-processors.js";
     keyValue,
     "'insertKey' does not insert the correct key value"
   );
-})();
+}
