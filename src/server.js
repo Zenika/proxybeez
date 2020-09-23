@@ -16,7 +16,10 @@ export function createServer(config) {
 
 const handleRequest = (config) => async (req, res) => {
   try {
-    const incomingUrl = new URL(req.url, "http://example.com");
+    const incomingUrl = new URL(
+      req.url,
+      "http://example.com" /* this value is not important */
+    );
     const pathConfig = config.requests[incomingUrl.pathname];
     if (!pathConfig) {
       return notFound(res);
