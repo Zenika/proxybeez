@@ -1,18 +1,17 @@
 import * as http from "http";
+import * as querystring from "querystring";
 import * as requestProcessors from "./request-processors.js";
 import * as responseProcessors from "./response-processors.js";
 import { okJsonRequest } from "./http-client.js";
 
-const CONFIG = parseConfig(process.env.PROXYBEEZ_CONFIG);
-
-export function createServer() {
-  return http.createServer(handleRequest);
+export function createServer(config) {
+  return http.createServer(handleRequest(config));
 }
 
-async function handleRequest(req, res) {
+const handleRequest = (config) => async (req, res) => {
   try {
     const incomingUrl = new URL(req.url, "http://example.com");
-    const pathConfig = CONFIG.requests[incomingUrl.pathname];
+    const pathConfig = config.requests[incomingUrl.pathname];
     if (!pathConfig) {
       res.writeHead(404).end();
       return;
@@ -24,7 +23,7 @@ async function handleRequest(req, res) {
     let outgoingUrl;
     try {
       outgoingUrl = renderOutgoingUrl(
-        CONFIG.alibeez.baseUrl,
+        config.alibeez.baseUrl,
         pathConfig.url,
         incomingUrl.searchParams
       );
@@ -48,7 +47,7 @@ async function handleRequest(req, res) {
     }
     const responses = await requestAlibeezTenants(
       outgoingUrl,
-      CONFIG.alibeez.tenants
+      config.alibeez.tenants
     );
     const response = mergeTenantResponses(responses);
     res.writeHead(200);
@@ -59,15 +58,7 @@ async function handleRequest(req, res) {
     res.write(JSON.stringify({ error: true, message: err.message }));
     res.end();
   }
-}
-
-function parseConfig(stringConfig) {
-  try {
-    return JSON.parse(stringConfig);
-  } catch (err) {
-    throw new Error(`Cannot parse config as JSON: ${err.message}`);
-  }
-}
+};
 
 /**
  *
@@ -76,7 +67,7 @@ function parseConfig(stringConfig) {
  * @param {URLSearchParams} params
  * @returns {string}
  */
-function renderOutgoingUrl(baseUrl, template, params) {
+export function renderOutgoingUrl(baseUrl, template, params) {
   return (
     baseUrl + renderTemplate(template, convertSearchParamsToObject(params))
   );
@@ -90,7 +81,9 @@ function renderOutgoingUrl(baseUrl, template, params) {
 function convertSearchParamsToObject(searchParams) {
   const result = {};
   for (const key of searchParams.keys()) {
-    result[key] = searchParams.getAll(key);
+    result[key] = searchParams
+      .getAll(key)
+      .map((value) => querystring.escape(value));
   }
   return result;
 }

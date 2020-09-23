@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon --require dotenv/config --inspect src/index.js",
     "start": "node src/index.js",
-    "test": "node unit-testing.test.js",
+    "test": "node src/test.js",
     "typecheck": "tsc",
     "prettier": "prettier '.circleci/config.yml'  'src/{**/,}*.{js,json}' '*.test.{js,json}'",
     "prettier:check": "npm run prettier -- --check",

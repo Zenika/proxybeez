@@ -1,7 +1,16 @@
 import { createServer } from "./server.js";
 
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+const CONFIG = parseConfig(process.env.PROXYBEEZ_CONFIG);
 
-createServer().listen(port, () => {
-  console.log(`Listening on port ${port}`);
+createServer(CONFIG).listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
 });
+
+function parseConfig(stringConfig) {
+  try {
+    return JSON.parse(stringConfig);
+  } catch (err) {
+    throw new Error(`Cannot parse config as JSON: ${err.message}`);
+  }
+}
