@@ -34,8 +34,6 @@ workflows:
   deploy:
     jobs:
       - quality-check:
-          requires:
-            - install-dependencies
           filters:
             tags:
               only: /.*/
