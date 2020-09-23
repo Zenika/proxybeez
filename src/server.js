@@ -29,7 +29,10 @@ const handleRequest = (config) => async (req, res) => {
     }
     let outgoingUrl;
     try {
-      outgoingUrl = renderOutgoingPath(pathConfig.path, incomingUrl.searchParams);
+      outgoingUrl = renderOutgoingPath(
+        pathConfig.path,
+        incomingUrl.searchParams
+      );
     } catch (err) {
       return badRequest(res, `Missing query parameter: ${err.key}`);
     }
