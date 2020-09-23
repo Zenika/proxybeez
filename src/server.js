@@ -34,7 +34,11 @@ const handleRequest = (config) => async (req, res) => {
         incomingUrl.searchParams
       );
     } catch (err) {
-      return badRequest(res, `Missing query parameter: ${err.key}`);
+      if (err.key) {
+        return badRequest(res, `Missing query parameter: ${err.key}`);
+      } else {
+        throw err;
+      }
     }
     if (pathConfig.mock) {
       return ok(res, pathConfig.mock);
