@@ -1,11 +1,7 @@
 import * as http from "http";
 import * as querystring from "querystring";
-import * as requestProcessors from "./requestProcessors/requestProcessors.js";
-import * as responseProcessors from "./responseProcessors/responseProcessors.js";
-import { okJsonRequest } from "./http-client.js";
-import renderTemplate from "./renderTemplate.js"
-import asyncMap from "./asyncMap.js"
-
+import { requestAlibeez } from "./alibeez.js";
+import renderTemplate from "./renderTemplate.js";
 
 export function createServer(config) {
   return http.createServer(handleRequest(config));
@@ -25,11 +21,7 @@ const handleRequest = (config) => async (req, res) => {
     }
     let outgoingUrl;
     try {
-      outgoingUrl = renderOutgoingUrl(
-        config.alibeez.baseUrl,
-        pathConfig.url,
-        incomingUrl.searchParams
-      );
+      outgoingUrl = renderOutgoingUrl(pathConfig.url, incomingUrl.searchParams);
     } catch (err) {
       res.writeHead(400);
       res.write(
@@ -48,11 +40,7 @@ const handleRequest = (config) => async (req, res) => {
       res.end();
       return;
     }
-    const responses = await requestAlibeezTenants(
-      outgoingUrl,
-      config.alibeez.tenants
-    );
-    const response = mergeTenantResponses(responses);
+    const response = await requestAlibeez(outgoingUrl, config.alibeez);
     res.writeHead(200);
     res.write(JSON.stringify(response));
     res.end();
@@ -65,15 +53,12 @@ const handleRequest = (config) => async (req, res) => {
 
 /**
  *
- * @param {string} baseUrl
  * @param {string} template
  * @param {URLSearchParams} params
  * @returns {string}
  */
-export function renderOutgoingUrl(baseUrl, template, params) {
-  return (
-    baseUrl + renderTemplate(template, convertSearchParamsToObject(params))
-  );
+export function renderOutgoingUrl(template, params) {
+  return renderTemplate(template, convertSearchParamsToObject(params));
 }
 
 /**
@@ -89,42 +74,4 @@ function convertSearchParamsToObject(searchParams) {
       .map((value) => querystring.escape(value));
   }
   return result;
-}
-
-/**
- *
- * @param {string} url
- * @param {object} tenants
- */
-function requestAlibeezTenants(url, tenants) {
-  return asyncMap(
-    Object.values(tenants),
-    async ({ requestProcessors = [], responseProcessors = [] }) => {
-      const processedUrl = requestProcessors.reduce(runRequestProcessor, url);
-      const response = await requestAlibeezTenant(processedUrl);
-      const processedResponse = responseProcessors.reduce(
-        runResponseProcessors,
-        response
-      );
-      return processedResponse;
-    }
-  );
-}
-
-function runRequestProcessor(url, processorConfig) {
-  const [id, config] = Object.entries(processorConfig)[0];
-  return requestProcessors[id](url, config);
-}
-
-function runResponseProcessors(response, processorConfig) {
-  const [id, config] = Object.entries(processorConfig)[0];
-  return responseProcessors[id](response, config);
-}
-
-function requestAlibeezTenant(url) {
-  return okJsonRequest(url);
-}
-
-function mergeTenantResponses(responses) {
-  return responses.flatMap((response) => response.result);
 }
