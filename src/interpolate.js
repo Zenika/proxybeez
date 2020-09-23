@@ -4,7 +4,7 @@
  * @param {object} vars
  * @returns {string}
  */
-export default function renderTemplate(template, vars) {
+export default function interpolate(template, vars) {
   return template.replace(/\${(.*?)}/g, (_, $1) => {
     if ($1 in vars) {
       return vars[$1];

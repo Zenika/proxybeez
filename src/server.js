@@ -1,7 +1,7 @@
 import * as http from "http";
 import * as querystring from "querystring";
 import { requestAlibeez } from "./alibeez.js";
-import renderTemplate from "./renderTemplate.js";
+import interpolate from "./interpolate.js";
 
 export function createServer(config) {
   return http.createServer(handleRequest(config));
@@ -58,7 +58,7 @@ const handleRequest = (config) => async (req, res) => {
  * @returns {string}
  */
 export function renderOutgoingUrl(template, params) {
-  return renderTemplate(template, convertSearchParamsToObject(params));
+  return interpolate(template, convertSearchParamsToObject(params));
 }
 
 /**

@@ -3,7 +3,7 @@ import { renderOutgoingUrl } from "./server.js";
 import {} from "./requestProcessors/excludeFields.test.js";
 import {} from "./requestProcessors/insertKey.test.js";
 import {} from "./responseProcessors/defaultFields.test.js";
-import {} from "./renderTemplate.test.js";
+import {} from "./interpolate.test.js";
 
 {
   const actual = renderOutgoingUrl(

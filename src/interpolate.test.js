@@ -1,30 +1,30 @@
 import * as assert from "assert";
-import renderTemplate from "./renderTemplate.js";
+import interpolate from "./interpolate.js";
 
 {
-  const actual = renderTemplate("${var}", { var: "varValue" });
+  const actual = interpolate("${var}", { var: "varValue" });
   const expected = "varValue";
   assert.strictEqual(
     actual,
     expected,
-    "'renderTemplate' cannot interpolate a single variable in a string with nothing else in it"
+    "'interpolate' cannot handle a single variable in a string with nothing else in it"
   );
 }
 
 {
-  const actual = renderTemplate("this is the value: ${var};", {
+  const actual = interpolate("this is the value: ${var};", {
     var: "varValue",
   });
   const expected = "this is the value: varValue;";
   assert.strictEqual(
     actual,
     expected,
-    "'renderTemplate' cannot interpolate a single variable in a string with static content around it"
+    "'interpolate' cannot handle a single variable in a string with static content around it"
   );
 }
 
 {
-  const actual = renderTemplate(
+  const actual = interpolate(
     "this is the value: ${var}; this is another value ${val};",
     { var: "varValue", val: "valValue" }
   );
@@ -33,6 +33,6 @@ import renderTemplate from "./renderTemplate.js";
   assert.strictEqual(
     actual,
     expected,
-    "'renderTemplate' cannot interpolate multiple variables in a string with static content around them"
+    "'interpolate' cannot handle multiple variables in a string with static content around them"
   );
 }
