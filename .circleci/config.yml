@@ -38,12 +38,24 @@ workflows:
             tags:
               only: /.*/
       - deploy:
+          name: deploy-staging
           clever-app-id: app_b2928a5b-2ffd-41d9-b15f-3d3ee3d779dc
           requires:
             - quality-check
           context: clever-cloud2-zenika-dev
           filters:
             branches:
-              only: rerewrite
+              only: master
             tags:
               ignore: /.*/
+      - deploy:
+          name: deploy-prod
+          clever-app-id: app_a022b4e6-6e21-4f19-8996-abd0317d0e38
+          requires:
+            - quality-check
+          context: clever-cloud2-zenika-dev
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v.*/
