@@ -5,7 +5,7 @@ import {} from "./requestProcessors/insertKey.test.js";
 import {} from "./responseProcessors/defaultFields.test.js";
 import {} from "./utils/interpolate.test.js";
 import {} from "./utils/asyncMap.test.js";
-import {} from "./utils/deepDefaults.test.js"
+import {} from "./utils/deepDefaults.test.js";
 
 {
   const actual = renderOutgoingPath(
