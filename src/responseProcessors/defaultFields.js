@@ -1,3 +1,5 @@
+import deepDefaults from "../utils/deepDefaults.js";
+
 /**
  *
  * @param {object} response
@@ -6,10 +8,7 @@
  */
 export function defaultFields(response, defaultValues) {
   const resultWithDefaults = response.result.map((result) => {
-    return {
-      ...defaultValues,
-      ...result,
-    };
+    return deepDefaults(result, defaultValues);
   });
   return {
     ...response,
