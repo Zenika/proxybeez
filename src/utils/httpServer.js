@@ -16,6 +16,7 @@ export function ok(res, body) {
 /**
  *
  * @param {http.ServerResponse} res
+ * @param {http.IncomingMessage} req
  * @param {Error} err
  * @returns {http.ServerResponse}
  */

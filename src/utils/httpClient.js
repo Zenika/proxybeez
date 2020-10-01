@@ -13,7 +13,7 @@ export default async function okJsonRequest(url) {
     );
   }
   const text = await parseBodyAsText(response);
-  return JSON.parse(text);
+  return text && JSON.parse(text);
 }
 
 /**
@@ -33,6 +33,7 @@ function request(url) {
 /**
  *
  * @param {http.IncomingMessage} response
+ * @param {string | URL} url
  * @returns {Promise<http.IncomingMessage>}
  */
 async function okOrThrow(response, url) {
@@ -46,7 +47,7 @@ async function okOrThrow(response, url) {
 /**
  *
  * @param {http.IncomingMessage} response
- * @returns {Promise<string>}
+ * @returns {Promise<string | null>}
  */
 async function parseBodyAsText(response) {
   let body = null;
@@ -68,6 +69,7 @@ function hasJsonBody(response) {
 export class HttpClientError extends Error {
   /**
    *
+   * @param {string | URL} url
    * @param {http.IncomingMessage} response
    */
   static async of(url, response) {
@@ -82,7 +84,7 @@ export class HttpClientError extends Error {
   /**
    *
    * @param {string | URL} url
-   * @param {{ statusCode: number, headers: http.IncomingHttpHeaders, body: string }} response
+   * @param {{ statusCode?: number, headers: http.IncomingHttpHeaders, body: string | null }} response
    */
   constructor(url, response) {
     super("External HTTP service responded with error status code");

@@ -3,7 +3,7 @@ import asyncMap from "./asyncMap.js";
 
 (async () => {
   const actual = await asyncMap([], () => {});
-  const expected = [];
+  /** @type unknown[] */ const expected = [];
   assert.deepStrictEqual(
     actual,
     expected,

@@ -13,6 +13,6 @@ export default function renderPathTemplate(template, searchParams) {
         `Cannot render template: missing value for key '${$1}'`
       );
     }
-    return querystring.escape(searchParams.get($1));
+    return querystring.escape(searchParams.get($1) ?? "");
   });
 }

@@ -13,10 +13,13 @@ export function createServer(config) {
   return http.createServer(handleRequest(config));
 }
 
-const handleRequest = (config) => async (req, res) => {
+const handleRequest = (config) => async (
+  /** @type {http.IncomingMessage} */ req,
+  /** @type {http.ServerResponse} */ res
+) => {
   try {
     const incomingUrl = new URL(
-      req.url,
+      req.url || "/",
       "http://example.com" /* this value is not important */
     );
     const pathConfig = config.requests[incomingUrl.pathname];
