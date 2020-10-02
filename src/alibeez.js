@@ -6,23 +6,29 @@ import * as responseProcessors from "./responseProcessors/responseProcessors.js"
 /**
  *
  * @param {string} url
- * @param {object} config
+ * @param {import("./config.js").AlibeezConfig} config
  */
 export async function requestAlibeez(url, config) {
   return mergeTenantResponses(
-    await requestAlibeezTenants(config.baseUrl + url, config.tenants)
+    await requestAlibeezTenants(new URL(url, config.baseUrl), config.tenants)
   );
 }
 
 /**
  *
- * @param {string} url
- * @param {object} tenants
+ * @param {URL} url
+ * @param {import("./config.js").TenantsConfig} tenants
  */
 function requestAlibeezTenants(url, tenants) {
   return asyncMap(Object.values(tenants), requestAlibeezTenant(url));
 }
 
+/**
+ * @typedef {{ result?: { [key: string]: unknown }[] }} AlibeezResponse
+ *
+ * @param {URL} url
+ * @returns {(tenant: import("./config.js").TenantConfig) => any}
+ */
 function requestAlibeezTenant(url) {
   return async (tenant) => {
     const processedUrl = runProcessors(
@@ -30,6 +36,7 @@ function requestAlibeezTenant(url) {
       tenant.requestProcessors,
       requestProcessors
     );
+    /** @type {AlibeezResponse} */
     const response = await request(processedUrl);
     const processedResponse = runProcessors(
       response,
@@ -40,6 +47,13 @@ function requestAlibeezTenant(url) {
   };
 }
 
+/**
+ *
+ * @template {unknown} T
+ * @param {T} initialInput
+ * @param {(import("./config.js").RequestProcessorConfig | import("./config.js").ResponseProcessorConfig)[]} configs
+ * @param {{ [id: string]: (t: T, config: any) => T}} processors
+ */
 function runProcessors(initialInput, configs = [], processors) {
   return configs.reduce((input, config) => {
     const [id, arg] = Object.entries(config)[0];
@@ -47,6 +61,11 @@ function runProcessors(initialInput, configs = [], processors) {
   }, initialInput);
 }
 
+/**
+ *
+ * @param {AlibeezResponse[]} responses
+ * @returns {unknown[]}
+ */
 function mergeTenantResponses(responses) {
-  return responses.flatMap((response) => response.result);
+  return responses.flatMap((response) => response.result ?? []);
 }

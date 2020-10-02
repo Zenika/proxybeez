@@ -7,6 +7,9 @@
 export function excludeFields(url, excludedFields) {
   const urlCopy = new URL(url.toString());
   const fields = urlCopy.searchParams.get("fields");
+  if (!fields) {
+    return urlCopy;
+  }
   const includedFields = fields
     .split(",")
     .filter((field) => !excludedFields.includes(field))
