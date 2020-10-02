@@ -1,3 +1,4 @@
+import { typecheckConfig } from "./config.js";
 import { createServer } from "./server.js";
 
 const PORT = process.env.PORT || 3000;
@@ -13,8 +14,12 @@ createServer(CONFIG).listen(PORT, () => {
  */
 function parseConfig(stringConfig) {
   try {
-    return JSON.parse(String(stringConfig));
+    return typecheckConfig(JSON.parse(String(stringConfig)));
   } catch (err) {
-    throw new Error(`Cannot parse config as JSON: ${err.message}`);
+    if (err instanceof SyntaxError) {
+      throw new Error(`Cannot parse config as JSON: ${err.message}`);
+    } else {
+      throw err;
+    }
   }
 }
