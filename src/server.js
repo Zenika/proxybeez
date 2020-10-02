@@ -1,5 +1,4 @@
 import * as http from "http";
-import * as querystring from "querystring";
 import { requestAlibeez } from "./alibeez.js";
 import {
   ok,
@@ -8,7 +7,7 @@ import {
   unauthorized,
   serverError,
 } from "./utils/httpServer.js";
-import interpolate from "./utils/interpolate.js";
+import renderPathTemplate from "./renderPathTemplate.js";
 
 export function createServer(config) {
   return http.createServer(handleRequest(config));
@@ -29,7 +28,7 @@ const handleRequest = (config) => async (req, res) => {
     }
     let outgoingUrl;
     try {
-      outgoingUrl = renderOutgoingPath(
+      outgoingUrl = renderPathTemplate(
         pathConfig.path,
         incomingUrl.searchParams
       );
@@ -49,28 +48,3 @@ const handleRequest = (config) => async (req, res) => {
     return serverError(res, req, err);
   }
 };
-
-/**
- *
- * @param {string} template
- * @param {URLSearchParams} params
- * @returns {string}
- */
-export function renderOutgoingPath(template, params) {
-  return interpolate(template, convertSearchParamsToObject(params));
-}
-
-/**
- *
- * @param {URLSearchParams} searchParams
- * @returns {object}
- */
-function convertSearchParamsToObject(searchParams) {
-  const result = {};
-  for (const key of searchParams.keys()) {
-    result[key] = searchParams
-      .getAll(key)
-      .map((value) => querystring.escape(value));
-  }
-  return result;
-}
