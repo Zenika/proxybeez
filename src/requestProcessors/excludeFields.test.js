@@ -6,7 +6,7 @@ import { excludeFields } from "./excludeFields.js";
     "excluded",
   ]);
   assert.doesNotMatch(
-    actual.searchParams.get("fields"),
+    actual.searchParams.get("fields") ?? "",
     /excluded/,
     "'excludeFields' cannot exclude the only field"
   );
@@ -18,7 +18,7 @@ import { excludeFields } from "./excludeFields.js";
     ["excluded"]
   );
   assert.doesNotMatch(
-    actual.searchParams.get("fields"),
+    actual.searchParams.get("fields") ?? "",
     /excluded/,
     "'excludeFields' cannot exclude one field among multiple"
   );
@@ -30,7 +30,7 @@ import { excludeFields } from "./excludeFields.js";
     ["excluded"]
   );
   assert.match(
-    actual.searchParams.get("fields"),
+    actual.searchParams.get("fields") ?? "",
     /included,alsoIncluded/,
     "'excludeFields' excludes fields that it should not"
   );

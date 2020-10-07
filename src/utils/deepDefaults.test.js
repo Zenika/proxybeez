@@ -2,22 +2,12 @@ import * as assert from "assert";
 import deepDefaults from "./deepDefaults.js";
 
 {
-  const actual = deepDefaults(null);
-  const expected = {};
-  assert.deepStrictEqual(
-    actual,
-    expected,
-    "'deepDefaults' does not return empty object when input is null"
-  );
-}
-
-{
-  const actual = deepDefaults({ a: 1 }, null);
+  const actual = deepDefaults({ a: 1 }, {});
   const expected = { a: 1 };
   assert.deepStrictEqual(
     actual,
     expected,
-    "'deepDefaults' does not return source values if defaults is null"
+    "'deepDefaults' does not return source values if there are no defaults"
   );
 }
 

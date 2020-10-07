@@ -1,6 +1,6 @@
 /**
  *
- * @param {string | URL} url
+ * @param {URL | string} url
  * @param {string} key
  * @returns {URL}
  */

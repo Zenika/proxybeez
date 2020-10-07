@@ -1,8 +1,13 @@
+/**
+ *
+ * @param {{[key: string]: any}} source
+ * @param {{[key: string]: any}} defaultValues
+ */
 export default function deepDefaults(source, defaultValues) {
   if (!source) {
     return defaultValues || {};
   }
-  const result = {};
+  /** @type {{[key: string]: any}} */ const result = {};
   for (const [key, value] of Object.entries(source)) {
     const defaultValue = defaultValues?.[key];
     if (

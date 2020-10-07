@@ -5,6 +5,7 @@
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "strict": true
   }
 }
