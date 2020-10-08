@@ -51,7 +51,7 @@ const handleRequest = (config) => async (req, res) => {
     if (pathConfig.mock) {
       return ok(res, pathConfig.mock);
     }
-    const response = await requestAlibeez(outgoingUrl, config.alibeez);
+    const response = await requestAlibeez(outgoingUrl, config.alibeez, pathConfig);
     return ok(res, response);
   } catch (err) {
     return serverError(res, req, err);

@@ -14,9 +14,13 @@
  * }} TenantsConfig
  *
  * @typedef {{
- *   requestProcessors?: RequestProcessorConfig[],
- *   responseProcessors?: ResponseProcessorConfig[]
+ *   processors?: ProcessorsConfig
  * }} TenantConfig
+ *
+ * @typedef {{
+ *   request?: RequestProcessorConfig[],
+ *   response?: ResponseProcessorConfig[]
+ * }} ProcessorsConfig
  *
  * @typedef {InsertKeyConfig | ExcludeFieldsConfig} RequestProcessorConfig
  *
@@ -28,11 +32,15 @@
  *   excludeFields: string[]
  * }} ExcludeFieldsConfig
  *
- * @typedef {DefaultFieldsConfig} ResponseProcessorConfig
+ * @typedef {DefaultFieldsConfig | FilterEmailAddressesOfEmployeesConfig} ResponseProcessorConfig
  *
  * @typedef {{
  *   defaultFields: object
  * }} DefaultFieldsConfig
+ *
+ * @typedef {{
+ *   filterEmailAddressesOfEmployees: string
+ * }} FilterEmailAddressesOfEmployeesConfig
  *
  * @typedef {{
  *   [key: string]: PathConfig
@@ -41,7 +49,8 @@
  * @typedef {{
  *   key: string,
  *   path: string,
- *   mock?: unknown
+ *   mock?: unknown,
+ *   processors?: ProcessorsConfig
  * }} PathConfig
  */
 
@@ -117,24 +126,10 @@ function typecheckTenantConfig(config) {
       "Invalid configuration: one of $.alibeez.tenants[*] is not an object"
     );
   }
-  if (hasProperty(config, "requestProcessors")) {
-    if (!isArray(config.requestProcessors)) {
-      throw new TypeError(
-        "Invalid configuration: one of $.alibeez.tenants[*].requestProcessors is not an array"
-      );
-    }
-    result.requestProcessors = config.requestProcessors.map(
-      typecheckRequestProcessor
-    );
-  }
-  if (hasProperty(config, "responseProcessors")) {
-    if (!isArray(config.responseProcessors)) {
-      throw new TypeError(
-        "Invalid configuration: one of $.alibeez.tenants[*].responseProcessors is not an array"
-      );
-    }
-    result.responseProcessors = config.responseProcessors.map(
-      typecheckResponseProcessor
+  if (hasProperty(config, "processors")) {
+    result.processors = typecheckProcessorsConfig(
+      config.processors,
+      "one of $.alibeez.tenants[*].processors"
     );
   }
   return result;
@@ -142,39 +137,76 @@ function typecheckTenantConfig(config) {
 
 /**
  * @param {unknown} config
+ * @param {string} path of where the config is in the global config
+ * @returns {ProcessorsConfig}
+ */
+function typecheckProcessorsConfig(config, path) {
+  /** @type ProcessorsConfig */ const result = {};
+  if (!isRecord(config)) {
+    throw new TypeError(`Invalid configuration: ${path} is not an object`);
+  }
+  if (hasProperty(config, "request")) {
+    if (!isArray(config.request)) {
+      throw new TypeError(
+        `Invalid configuration: ${path}.request is not an array`
+      );
+    }
+    result.request = config.request.map((requestProcessorConfig) =>
+      typecheckRequestProcessorConfig(requestProcessorConfig, path)
+    );
+  }
+  if (hasProperty(config, "response")) {
+    if (!isArray(config.response)) {
+      throw new TypeError(
+        `Invalid configuration: ${path}.response is not an array`
+      );
+    }
+    result.response = config.response.map((responseProcessorConfig) =>
+      typecheckResponseProcessorConfig(responseProcessorConfig, path)
+    );
+  }
+  return result;
+}
+
+/**
+ * @param {unknown} config
+ * @param {string} path of where the processors config is in the global config
  * @returns {RequestProcessorConfig}
  */
-function typecheckRequestProcessor(config) {
+function typecheckRequestProcessorConfig(config, path) {
   if (!isRecord(config)) {
     throw new TypeError(
-      "Invalid configuration: one of $.alibeez.tenants[*].requestProcessors[*] is not an object"
+      `Invalid configuration: ${path}.request[*] is not an object`
     );
   }
   if (hasProperty(config, "excludeFields")) {
-    return typecheckExcludeFieldsConfig(config);
+    return typecheckExcludeFieldsConfig(config, path);
   } else if (hasProperty(config, "insertKey")) {
-    return typecheckInsertKeyConfig(config);
+    return typecheckInsertKeyConfig(config, path);
   } else {
     throw new TypeError(
-      "Invalid configuration: one of $.alibeez.tenants[*].requestProcessors[*] is not a supported processor"
+      `Invalid configuration: ${path}.request[*] is not a supported processor: ${JSON.stringify(
+        config
+      )}`
     );
   }
 }
 
 /**
  * @param {{ excludeFields: unknown }} config
+ * @param {string} path of where the processors config is in the global config
  * @returns {ExcludeFieldsConfig}
  */
-function typecheckExcludeFieldsConfig(config) {
+function typecheckExcludeFieldsConfig(config, path) {
   if (!isArray(config.excludeFields)) {
     throw new TypeError(
-      "Invalid configuration: one of $.alibeez.tenants[*].requestProcessors[*].excludeFields is not an array"
+      `Invalid configuration: ${path}.request[*].excludeFields is not an array`
     );
   }
   const excludeFields = config.excludeFields.map((field) => {
     if (typeof field !== "string") {
       throw new TypeError(
-        "Invalid configuration: one of $.alibeez.tenants[*].requestProcessors[*].excludeFields[*] is not a string"
+        `Invalid configuration: ${path}.request[*].excludeFields[*] is not a string`
       );
     }
     return field;
@@ -184,12 +216,13 @@ function typecheckExcludeFieldsConfig(config) {
 
 /**
  * @param {{ insertKey: unknown }} config
+ * @param {string} path of where the processors config is in the global config
  * @returns {InsertKeyConfig}
  */
-function typecheckInsertKeyConfig({ insertKey }) {
+function typecheckInsertKeyConfig({ insertKey }, path) {
   if (typeof insertKey !== "string") {
     throw new TypeError(
-      "Invalid configuration: one of $.alibeez.tenants[*].requestProcessors[*].insertKey is not a string"
+      `Invalid configuration: ${path}.request[*].insertKey is not a string`
     );
   }
   return { insertKey };
@@ -197,34 +230,57 @@ function typecheckInsertKeyConfig({ insertKey }) {
 
 /**
  * @param {unknown} config
+ * @param {string} path of where the processors config is in the global config
  * @returns {ResponseProcessorConfig}
  */
-function typecheckResponseProcessor(config) {
+function typecheckResponseProcessorConfig(config, path) {
   if (!isRecord(config)) {
     throw new TypeError(
-      "Invalid configuration: one of $.alibeez.tenants[*].responseProcessors[*] is not an object"
+      `Invalid configuration: ${path}.response[*] is not an object`
     );
   }
   if (hasProperty(config, "defaultFields")) {
-    return typecheckDefaultFieldsConfig(config);
+    return typecheckDefaultFieldsConfig(config, path);
+  } else if (hasProperty(config, "filterEmailAddressesOfEmployees")) {
+    return typecheckFilterEmailAddressesOfEmployeesConfig(config, path);
   } else {
     throw new TypeError(
-      "Invalid configuration: one of $.alibeez.tenants[*].responseProcessors[*] is not a supported processor"
+      `Invalid configuration: ${path}.response[*] is not a supported processor: ${JSON.stringify(
+        config
+      )}`
     );
   }
 }
 
 /**
  * @param {{ defaultFields: unknown }} config
+ * @param {string} path of where the processors config is in the global config
  * @returns {DefaultFieldsConfig}
  */
-function typecheckDefaultFieldsConfig({ defaultFields }) {
+function typecheckDefaultFieldsConfig({ defaultFields }, path) {
   if (!isRecord(defaultFields)) {
     throw new TypeError(
-      "Invalid configuration: one of $.alibeez.tenants[*].responseProcessors[*].defaultFields is not an object"
+      `Invalid configuration: ${path}.response[*].defaultFields is not an object`
     );
   }
   return { defaultFields };
+}
+
+/**
+ * @param {{ filterEmailAddressesOfEmployees: unknown }} config
+ * @param {string} path of where the processors config is in the global config
+ * @returns {FilterEmailAddressesOfEmployeesConfig}
+ */
+function typecheckFilterEmailAddressesOfEmployeesConfig(
+  { filterEmailAddressesOfEmployees },
+  path
+) {
+  if (typeof filterEmailAddressesOfEmployees !== "string") {
+    throw new TypeError(
+      `Invalid configuration: ${path}.response[*].filterEmailAddressesOfEmployeesConfig is not a string`
+    );
+  }
+  return { filterEmailAddressesOfEmployees };
 }
 
 /**
@@ -272,12 +328,17 @@ function typecheckPathConfig(config) {
       "Invalid configuration: one of $.paths[*].path is not an string"
     );
   }
-  const { key, path } = config;
-  if (hasProperty(config, "mock")) {
-    return { key, path, mock: config.mock };
-  } else {
-    return { key, path };
+  /** @type PathConfig */ const result = { key: config.key, path: config.path };
+  if (hasProperty(config, "processors")) {
+    result.processors = typecheckProcessorsConfig(
+      config.processors,
+      "one of $.paths[*].processors"
+    );
   }
+  if (hasProperty(config, "mock")) {
+    result.mock = config.mock;
+  }
+  return result;
 }
 
 /**
