@@ -2,7 +2,7 @@
  *
  * @template T, R
  * @param {Iterable<T>} arr
- * @param {(t: T) => R} fn
+ * @param {(t: T) => Promise<R> | R} fn
  * @returns {Promise<Array<R>>}
  */
 export default async function asyncMap(arr, fn) {
