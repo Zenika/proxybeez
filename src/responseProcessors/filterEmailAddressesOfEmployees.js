@@ -1,8 +1,8 @@
 /**
  *
- * @param {import("../alibeez.js").AlibeezResponse} response
+ * @param {AlibeezResponse} response
  * @param {string} fieldName
- * @returns {import("../alibeez.js").AlibeezResponse}
+ * @returns {AlibeezResponse}
  */
 export function filterEmailAddressesOfEmployees(response, fieldName) {
   const filteredResults = response.result?.filter((result) => {

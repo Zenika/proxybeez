@@ -2,9 +2,9 @@ import deepDefaults from "../utils/deepDefaults.js";
 
 /**
  *
- * @param {import("../alibeez.js").AlibeezResponse} response
+ * @param {AlibeezResponse} response
  * @param {object} defaultValues
- * @returns {import("../alibeez.js").AlibeezResponse}
+ * @returns {AlibeezResponse}
  */
 export function defaultFields(response, defaultValues) {
   const resultWithDefaults = response.result?.map((result) => {

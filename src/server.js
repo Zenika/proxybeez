@@ -11,7 +11,7 @@ import renderPathTemplate from "./renderPathTemplate.js";
 
 /**
  *
- * @param {import("./config.js").Config} config
+ * @param {Config} config
  */
 export function createServer(config) {
   return http.createServer(handleRequest(config));
@@ -19,7 +19,7 @@ export function createServer(config) {
 
 /**
  *
- * @param {import("./config.js").Config} config
+ * @param {Config} config
  * @returns {http.RequestListener}
  */
 const handleRequest = (config) => async (req, res) => {

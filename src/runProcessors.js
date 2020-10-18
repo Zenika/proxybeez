@@ -2,7 +2,7 @@
  *
  * @template {unknown} T
  * @param {T} initialInput
- * @param {(import("./config.js").RequestProcessorConfig | import("./config.js").ResponseProcessorConfig)[]} configs
+ * @param {(RequestProcessorConfig | ResponseProcessorConfig)[]} configs
  * @param {{ [id: string]: (t: T, config: any) => T}} library
  */
 export default function runProcessors(initialInput, configs = [], library) {

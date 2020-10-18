@@ -7,8 +7,8 @@ import * as responseProcessorLibrary from "./responseProcessors/responseProcesso
 /**
  *
  * @param {string} url
- * @param {import("./config.js").AlibeezConfig} alibeezConfig
- * @param {import("./config.js").PathConfig} pathConfig
+ * @param {AlibeezConfig} alibeezConfig
+ * @param {PathConfig} pathConfig
  */
 export async function requestAlibeez(url, alibeezConfig, pathConfig) {
   return mergeTenantResponses(
@@ -23,8 +23,8 @@ export async function requestAlibeez(url, alibeezConfig, pathConfig) {
 /**
  *
  * @param {URL} url
- * @param {import("./config.js").TenantsConfig} tenants
- * @param {import("./config.js").PathConfig} pathConfig
+ * @param {TenantsConfig} tenants
+ * @param {PathConfig} pathConfig
  */
 function requestAlibeezTenants(url, tenants, pathConfig) {
   return asyncMap(
@@ -37,9 +37,9 @@ function requestAlibeezTenants(url, tenants, pathConfig) {
 
 /**
  *
- * @param {import("./config.js").ProcessorsConfig=} headProcessors
- * @param {import("./config.js").ProcessorsConfig=} tailProcessors
- * @returns {import("./config.js").ProcessorsConfig}
+ * @param {ProcessorsConfig=} headProcessors
+ * @param {ProcessorsConfig=} tailProcessors
+ * @returns {ProcessorsConfig}
  */
 function mergeProcessors(headProcessors = {}, tailProcessors = {}) {
   return {
@@ -55,10 +55,8 @@ function mergeProcessors(headProcessors = {}, tailProcessors = {}) {
 }
 
 /**
- * @typedef {{ result?: { [key: string]: unknown }[] }} AlibeezResponse
- *
  * @param {URL} url
- * @returns {(processorsConfig: import("./config.js").ProcessorsConfig) => Promise<AlibeezResponse>}
+ * @returns {AlibeezRequester}
  */
 function requestAlibeezTenant(url) {
   return async (processors) => {
