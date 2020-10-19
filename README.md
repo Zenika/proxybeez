@@ -128,5 +128,5 @@ need to import those files in other files.
 
 ## Formatting
 
-This projects uses prettier. Check formatting with `npm run prettier:check` or
+This project uses prettier. Check formatting with `npm run prettier:check` or
 format the code with `npm run prettier:write`.
