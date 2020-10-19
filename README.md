@@ -74,9 +74,10 @@ be called to transform the request or the response. The name of processors match
 a function in the code, which is called with the matching part of the
 configuration.
 
-The following example shows how to call the `excludeFields` processors, which
-exclude fields from the `fields` query parameter of an Alibeez request. The
+The following example shows how to call the `excludeFields` processor, which
+excludes fields from the `fields` query parameter of an Alibeez request. The
 matching function is defined in `src/requestProcessors/excludeFields.js`.
+`["exampleField1", "exampleField2"]` is passed as an argument to the function.
 
 ```json
 {
