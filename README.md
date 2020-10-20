@@ -60,7 +60,19 @@ delegate to the `/query/users` endpoint of Alibeez.
 }
 ```
 
-The value for `key` specifies the bearer token that the client must call with.
+Paths can be descriptive, opaque, or a mix of the two. Usage of opaque paths (at
+least partially opaque) is advised in order to make them more difficult to guess.
+
+The value for `key` specifies the bearer token that the client must call this
+path with. Each path should have its own unique token to limit what one token
+holder can call. However, the same token may be used for multiple paths if those
+paths are intended to be used by the same client.
+
+> ⚠ The rules of tokens:
+> - Tokens *MUST* be long, opaque, randomly generated strings. Use a password
+>   generator.
+> - Tokens are sensitive data and *MUST NOT* be shared across multiple clients.
+
 Values can be interpolated into `path`. These values are expected to be
 specified using the query parameters of the incoming request. For this example,
 calling `/example_path?username=example@example.com` would result in Proxybeez
