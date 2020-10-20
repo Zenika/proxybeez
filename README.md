@@ -69,7 +69,7 @@ on Alibeez. Interpolated values are escaped for usage in query parameters.
 
 ## Processors
 
-On either tenants on paths, the configuration can define a list of processors to
+On either tenants or paths, the configuration can define a list of processors to
 be called to transform the request or the response. The name of processors match
 a function in the code, which is called with the matching part of the
 configuration.
