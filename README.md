@@ -20,7 +20,7 @@ Proxybeez fills those two requirements.
 # How it works
 
 Proxybeez works like a reverse-proxy. It has a configuration that defines how
-requests should be routed, and it simply obeys that.
+requests should be routed to Alibeez, and it simply obeys that.
 
 The configuration must be provided in JSON format through the `PROXYBEEZ_CONFIG`
 environment variable or stored in a file pointed to by the
@@ -31,7 +31,7 @@ type-checked at startup.
 The configuration is split in two sections : `alibeez` and `paths`. The first
 section defines how Alibeez should be called for all requests. It includes the
 definitions of tenants. The second section defines what paths (aka routes) are
-available and to what Alibeez request they translate to.
+available on the Proxybeez server and to what Alibeez request they translate to.
 
 ## Alibeez section
 
@@ -60,24 +60,32 @@ delegate to the `/query/users` endpoint of Alibeez.
 }
 ```
 
-Paths can be descriptive, opaque, or a mix of the two. Usage of opaque paths (at
-least partially opaque) is advised in order to make them more difficult to guess.
+Path names (here `/example_path`) can be descriptive, opaque, or a mix of the
+two. Usage of opaque paths (at least partially opaque) is advised in order to
+make them more difficult to guess. Path names are matched against the [path
+name](https://nodejs.org/dist/latest-v14.x/docs/api/url.html#url_url_pathname)
+of [the URL of incoming
+requests](https://nodejs.org/dist/latest-v14.x/docs/api/http.html#http_message_url).
 
-The value for `key` specifies the bearer token that the client must call this
-path with. Each path should have its own unique token to limit what one token
-holder can call. However, the same token may be used for multiple paths if those
-paths are intended to be used by the same client.
+The value for `key` specifies the static bearer token that the client must call
+this path with. This is how the client authenticates. Each path should have its
+own unique token to limit what one token holder can call. However, the same
+token may be used for multiple paths if those paths are intended to be used by
+the same client.
 
 > ⚠ The rules of tokens:
 > - Tokens *MUST* be long, opaque, randomly generated strings. Use a password
 >   generator.
 > - Tokens are sensitive data and *MUST NOT* be shared across multiple clients.
 
-Values can be interpolated into `path`. These values are expected to be
-specified using the query parameters of the incoming request. For this example,
-calling `/example_path?username=example@example.com` would result in Proxybeez
-calling `/query/users?filter=username==example@example.com&fields=uuid,username`
-on Alibeez. Interpolated values are escaped for usage in query parameters.
+The value for `path` is the Alibeez path (relative to `alibeez.baseUrl`) to
+which incoming requests to this path name should be delegated. `path` can
+include interpolation placeholders using JavaScript template string syntax. The
+values to interpolate are expected to be specified using the query parameters of
+the incoming request. For this example, calling
+`/example_path?username=example@example.com` would result in Proxybeez calling
+`/query/users?filter=username==example@example.com&fields=uuid,username` on
+Alibeez. Interpolated values are escaped for usage in query parameters.
 
 ## Processors
 
