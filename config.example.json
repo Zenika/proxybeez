@@ -1,0 +1,7 @@
+{
+  "alibeez": {
+    "baseUrl": "https://example.my.alibeez.com/api",
+    "tenants": {}
+  },
+  "paths": {}
+}
