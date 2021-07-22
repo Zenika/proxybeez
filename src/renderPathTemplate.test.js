@@ -46,7 +46,7 @@ import renderPathTemplate from "./renderPathTemplate.js";
 {
   assert.throws(
     () => renderPathTemplate("${var}", new URLSearchParams()),
-    TypeError,
+    { key: "var" },
     "'renderPathTemplate' does not throw on missing key"
   );
 }
