@@ -7,7 +7,7 @@ import * as http from "http";
  * @returns {http.ServerResponse}
  */
 export function ok(res, body) {
-  res.writeHead(200);
+  res.writeHead(200, { "Content-Type": "application/json" });
   res.write(JSON.stringify(body));
   res.end();
   return res;
