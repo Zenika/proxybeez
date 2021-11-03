@@ -59,7 +59,7 @@ async function parseBodyAsText(response) {
 
 /**
  *
- * @param {http.IncomingMessage} response
+ * @param {{ headers: http.IncomingHttpHeaders}} response
  * @returns {boolean}
  */
 function hasJsonBody(response) {
@@ -94,5 +94,29 @@ export class HttpClientError extends Error {
 
   get statusCode() {
     return this.response.statusCode;
+  }
+
+  /**
+   *
+   * @param {http.ServerResponse} res
+   * @returns {http.ServerResponse}
+   */
+  forward(res) {
+    const body = this.response.body;
+    const forwardedBody =
+      body && hasJsonBody(this.response) ? JSON.parse(body) : body;
+    const message = {
+      message: `the downstream server returned an error`,
+      downstreamResponse: {
+        statusCode: this.statusCode,
+        body: forwardedBody,
+      },
+    };
+    res.writeHead(this.statusCode || 400, {
+      "content-type": "application/json",
+    });
+    res.write(JSON.stringify(message));
+    res.end();
+    return res;
   }
 }
