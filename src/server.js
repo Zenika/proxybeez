@@ -8,6 +8,7 @@ import {
   serverError,
 } from "./utils/httpServer.js";
 import renderPathTemplate from "./renderPathTemplate.js";
+import { HttpClientError } from "./utils/httpClient.js";
 
 /**
  *
@@ -58,6 +59,14 @@ const handleRequest = (config) => async (req, res) => {
     );
     return ok(res, response);
   } catch (err) {
+    if (
+      err instanceof HttpClientError &&
+      err.statusCode &&
+      err.statusCode >= 400 &&
+      err.statusCode < 500
+    ) {
+      return err.forward(res);
+    }
     return serverError(res, req, err);
   }
 };
