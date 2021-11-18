@@ -38,13 +38,13 @@ const handleRequest = (config) => async (req, res) => {
     if (req.headers.authorization !== `Bearer ${pathConfig.key}`) {
       return unauthorized(res);
     }
+    if (pathConfig.mock) {
+      return ok(res, pathConfig.mock);
+    }
     const outgoingUrl = renderPathTemplate(
       pathConfig.path,
       incomingUrl.searchParams
     );
-    if (pathConfig.mock) {
-      return ok(res, pathConfig.mock);
-    }
     const response = await requestAlibeez(
       outgoingUrl,
       config.alibeez,
