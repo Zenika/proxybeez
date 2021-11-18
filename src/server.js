@@ -7,7 +7,9 @@ import {
   unauthorized,
   serverError,
 } from "./utils/httpServer.js";
-import renderPathTemplate from "./renderPathTemplate.js";
+import renderPathTemplate, {
+  RenderPathTemplateMissingValue,
+} from "./renderPathTemplate.js";
 import { HttpClientError } from "./utils/httpClient.js";
 
 /**
@@ -36,19 +38,10 @@ const handleRequest = (config) => async (req, res) => {
     if (req.headers.authorization !== `Bearer ${pathConfig.key}`) {
       return unauthorized(res);
     }
-    let outgoingUrl;
-    try {
-      outgoingUrl = renderPathTemplate(
-        pathConfig.path,
-        incomingUrl.searchParams
-      );
-    } catch (err) {
-      if (err.key) {
-        return badRequest(res, `Missing query parameter: ${err.key}`);
-      } else {
-        throw err;
-      }
-    }
+    const outgoingUrl = renderPathTemplate(
+      pathConfig.path,
+      incomingUrl.searchParams
+    );
     if (pathConfig.mock) {
       return ok(res, pathConfig.mock);
     }
@@ -59,7 +52,9 @@ const handleRequest = (config) => async (req, res) => {
     );
     return ok(res, response);
   } catch (err) {
-    if (
+    if (err instanceof RenderPathTemplateMissingValue) {
+      return badRequest(res, `Missing query parameter: ${err.key}`);
+    } else if (
       err instanceof HttpClientError &&
       err.statusCode &&
       err.statusCode >= 400 &&
