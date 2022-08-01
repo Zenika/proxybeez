@@ -7,7 +7,7 @@ import * as http from "http";
  * @returns {http.ServerResponse}
  */
 export function ok(res, body) {
-  res.writeHead(200, { "Content-Type": "application/json" });
+  writeHead(res, 200, { "Content-Type": "application/json" });
   res.write(JSON.stringify(body));
   res.end();
   return res;
@@ -22,7 +22,7 @@ export function ok(res, body) {
  */
 export function serverError(res, req, err) {
   console.error(`ERROR: while handling '${req.url}'`, err);
-  res.writeHead(500);
+  writeHead(res, 500);
   res.end();
   return res;
 }
@@ -34,7 +34,7 @@ export function serverError(res, req, err) {
  * @returns {http.ServerResponse}
  */
 export function badRequest(res, message) {
-  res.writeHead(400);
+  writeHead(res, 400);
   res.write(JSON.stringify({ message }));
   res.end();
   return res;
@@ -47,7 +47,7 @@ export function badRequest(res, message) {
  */
 export function unauthorized(res) {
   // 404 is used on purpose, so that one cannot scan for valid paths.
-  res.writeHead(404);
+  writeHead(res, 404);
   res.end();
   return res;
 }
@@ -58,7 +58,20 @@ export function unauthorized(res) {
  * @returns {http.ServerResponse}
  */
 export function notFound(res) {
-  res.writeHead(404);
+  writeHead(res, 404);
   res.end();
   return res;
+}
+
+/**
+ *
+ * @param {http.ServerResponse} res
+ * @param {number} statusCode
+ * @param {http.OutgoingHttpHeaders=} headers
+ */
+function writeHead(res, statusCode, headers) {
+  res.writeHead(statusCode, {
+    ...headers,
+    "Strict-Transport-Security": "max-age=63072000",
+  });
 }
