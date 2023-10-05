@@ -269,7 +269,7 @@ function typecheckPathConfig(config) {
   }
   if (typeof config.path !== "string") {
     throw new TypeError(
-      "Invalid configuration: one of $.paths[*].path is not an string"
+      "Invalid configuration: one of $.paths[*].path is not a string"
     );
   }
   /** @type PathConfig */ const result = { key: config.key, path: config.path };
@@ -278,6 +278,21 @@ function typecheckPathConfig(config) {
       config.processors,
       "one of $.paths[*].processors"
     );
+  }
+  if (hasProperty(config, "tenants")) {
+    if (!isArray(config.tenants)) {
+      throw new TypeError(
+        `Invalid configuration: one of $.paths[*].tenants is not an array`
+      );
+    }
+    result.tenants = config.tenants.map((field) => {
+      if (typeof field !== "string") {
+        throw new TypeError(
+          `Invalid configuration: one of $.paths[*].tenants[*] is not a string`
+        );
+      }
+      return field;
+    });
   }
   if (hasProperty(config, "mock")) {
     result.mock = config.mock;

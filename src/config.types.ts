@@ -52,4 +52,5 @@ type PathConfig = {
   path: string;
   mock?: unknown;
   processors?: ProcessorsConfig;
+  tenants?: string[];
 };

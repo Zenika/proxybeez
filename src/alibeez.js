@@ -28,9 +28,13 @@ export async function requestAlibeez(url, alibeezConfig, pathConfig) {
  */
 function requestAlibeezTenants(url, tenants, pathConfig) {
   return asyncMap(
-    Object.values(tenants).map((tenant) =>
-      mergeProcessors(tenant.processors, pathConfig.processors)
-    ),
+    Object.entries(tenants)
+      .filter(
+        ([name]) => !pathConfig.tenants || pathConfig.tenants.includes(name)
+      )
+      .map(([, tenant]) =>
+        mergeProcessors(tenant.processors, pathConfig.processors)
+      ),
     requestAlibeezTenant(url)
   );
 }
