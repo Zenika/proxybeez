@@ -4,7 +4,7 @@
   "type": "module",
   "main": "src/index.js",
   "engines": {
-    "node": "^14.11.0"
+    "node": ">=14.11.0"
   },
   "scripts": {
     "dev": "nodemon --require dotenv/config --inspect src/index.js",
