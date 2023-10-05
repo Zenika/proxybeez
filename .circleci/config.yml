@@ -1,22 +1,20 @@
 version: 2.1
 
-executors:
-  main-executor:
-    docker:
-      - image: circleci/node:14
+orbs:
+  node: circleci/node@5.1.0
 
 jobs:
   quality-check:
-    executor: main-executor
+    executor: node/default
     steps:
       - checkout
-      - run: npm ci
+      - node/install-packages
       - run: npm run prettier:check
       - run: npm run typecheck
       - run: npm test
 
   deploy:
-    executor: main-executor
+    executor: node/default
     parameters:
       clever-app-id:
         type: string
