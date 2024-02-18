@@ -66,6 +66,21 @@ export function notFound(res) {
 /**
  *
  * @param {http.ServerResponse} res
+ * @returns {http.ServerResponse}
+ */
+export function cors(res) {
+  writeHead(res, 204, {
+    "Access-Control-Allow-Origin": "http://localhost:3000",
+    "Access-Control-Allow-Methods": "GET, POST",
+    "Access-Control-Allow-Headers": "Authorization",
+  });
+  res.end();
+  return res;
+}
+
+/**
+ *
+ * @param {http.ServerResponse} res
  * @param {number} statusCode
  * @param {http.OutgoingHttpHeaders=} headers
  */

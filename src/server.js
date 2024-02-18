@@ -1,4 +1,5 @@
 import * as http from "http";
+import * as jose from "jose";
 import { requestAlibeez } from "./alibeez.js";
 import {
   ok,
@@ -6,6 +7,7 @@ import {
   notFound,
   unauthorized,
   serverError,
+  cors,
 } from "./utils/httpServer.js";
 import renderPathTemplate, {
   RenderPathTemplateMissingValue,
@@ -31,12 +33,33 @@ const handleRequest = (config) => async (req, res) => {
       req.url || "/",
       "http://example.com" /* this value is not important */
     );
+    if (req.method === "OPTIONS") {
+      return cors(res);
+    }
     const pathConfig = config.paths[incomingUrl.pathname];
     if (!pathConfig) {
       return notFound(res);
     }
-    if (req.headers.authorization !== `Bearer ${pathConfig.key}`) {
+    if (
+      pathConfig.key !== "jwt" &&
+      req.headers.authorization !== `Bearer ${pathConfig.key}`
+    ) {
       return unauthorized(res);
+    }
+    if (pathConfig.key === "jwt") {
+      const googleJwks = jose.createRemoteJWKSet(
+        new URL("https://www.googleapis.com/oauth2/v3/certs")
+      );
+      const jwt = req.headers.authorization?.substring("Bearer ".length);
+      try {
+        const { payload } = await jose.jwtVerify(jwt, googleJwks, {
+          issuer: "https://accounts.google.com",
+        });
+        incomingUrl.searchParams.set("jwtEmail", payload.email);
+      } catch (err) {
+        console.warn("error while verifying jwt:", err);
+        return unauthorized(res);
+      }
     }
     if (pathConfig.mock) {
       return ok(res, pathConfig.mock);
